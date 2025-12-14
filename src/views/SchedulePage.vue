@@ -164,11 +164,7 @@ onMounted(async () => {
                         </span>
                       </div>
 
-                      <!-- Location (only for scheduled games) -->
-                      <div v-if="!isCompleted(game)" class="text-center text-xs text-gray-500 mt-1">
-                        <font-awesome-icon :icon="['fas', 'map-marker-alt']" class="mr-1" />
-                        {{ game.location }}
-                      </div>
+
                     </div>
 
                     <!-- Status Badge & Expand Icon -->

@@ -37,7 +37,6 @@ const formatDate = (dateStr: string): string => {
               <th class="text-gray-400">Date</th>
               <th class="text-gray-400">Time</th>
               <th class="text-gray-400">Matchup</th>
-              <th class="text-gray-400">Location</th>
               <th class="text-gray-400"></th>
             </tr>
           </thead>
@@ -54,12 +53,6 @@ const formatDate = (dateStr: string): string => {
                   <span class="font-semibold text-white">{{ game.homeTeam }}</span>
                   <span class="text-gray-500">vs</span>
                   <span class="font-semibold text-white">{{ game.awayTeam }}</span>
-                </div>
-              </td>
-              <td class="text-gray-400">
-                <div class="flex items-center gap-2">
-                  <font-awesome-icon :icon="['fas', 'map-marker-alt']" class="text-fcabl-accent" />
-                  {{ game.location }}
                 </div>
               </td>
               <td>
@@ -97,12 +90,6 @@ const formatDate = (dateStr: string): string => {
               <span class="text-lg font-bold text-white">{{ game.homeTeam }}</span>
               <span class="text-fcabl-accent font-bold">VS</span>
               <span class="text-lg font-bold text-white">{{ game.awayTeam }}</span>
-            </div>
-
-            <!-- Location -->
-            <div class="flex items-center gap-2 text-sm text-gray-400 justify-center">
-              <font-awesome-icon :icon="['fas', 'map-marker-alt']" class="text-fcabl-accent" />
-              {{ game.location }}
             </div>
 
             <!-- Action Button -->

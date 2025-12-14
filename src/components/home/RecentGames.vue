@@ -60,13 +60,9 @@ const formatDate = (dateStr: string): string => {
 
             <!-- Game Info -->
             <div class="mt-4 pt-4 border-t border-gray-700">
-              <div class="flex items-center text-sm text-gray-400 mb-2">
+              <div class="flex items-center text-sm text-gray-400">
                 <font-awesome-icon :icon="['fas', 'calendar']" class="mr-2" />
                 {{ formatDate(game.date) }} at {{ game.time }}
-              </div>
-              <div class="flex items-center text-sm text-gray-400">
-                <font-awesome-icon :icon="['fas', 'map-marker-alt']" class="mr-2" />
-                {{ game.location }}
               </div>
             </div>
 
