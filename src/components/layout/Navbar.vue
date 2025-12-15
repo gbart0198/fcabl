@@ -38,6 +38,7 @@ const handleLogout = async () => {
           <li><router-link to="/schedule" active-class="text-fcabl-accent bg-fcabl-dark/50 shadow-md ring-1 ring-fcabl-accent/30" class="text-gray-200 hover:text-white hover:bg-fcabl-dark/50">Schedule</router-link></li>
           <li><router-link to="/standings" active-class="text-fcabl-accent bg-fcabl-dark/50 shadow-md ring-1 ring-fcabl-accent/30" class="text-gray-200 hover:text-white hover:bg-fcabl-dark/50">Standings</router-link></li>
           <li><router-link to="/teams" active-class="text-fcabl-accent bg-fcabl-dark/50 shadow-md ring-1 ring-fcabl-accent/30" class="text-gray-200 hover:text-white hover:bg-fcabl-dark/50">Teams</router-link></li>
+          <li v-if="authStore.isAuthenticated"><router-link to="/admin" active-class="text-fcabl-accent bg-fcabl-dark/50 shadow-md ring-1 ring-fcabl-accent/30" class="text-gray-200 hover:text-white hover:bg-fcabl-dark/50">Admin</router-link></li>
         </ul>
       </div>
 
@@ -109,6 +110,7 @@ const handleLogout = async () => {
         <li><router-link to="/schedule" @click="toggleMobileMenu" active-class="text-fcabl-accent bg-fcabl-dark/50 font-semibold shadow-md ring-1 ring-fcabl-accent/30" class="text-gray-300">Schedule</router-link></li>
         <li><router-link to="/standings" @click="toggleMobileMenu" active-class="text-fcabl-accent bg-fcabl-dark/50 font-semibold shadow-md ring-1 ring-fcabl-accent/30" class="text-gray-300">Standings</router-link></li>
         <li><router-link to="/teams" @click="toggleMobileMenu" active-class="text-fcabl-accent bg-fcabl-dark/50 font-semibold shadow-md ring-1 ring-fcabl-accent/30" class="text-gray-300">Teams</router-link></li>
+        <li v-if="authStore.isAuthenticated"><router-link to="/admin" @click="toggleMobileMenu" active-class="text-fcabl-accent bg-fcabl-dark/50 font-semibold shadow-md ring-1 ring-fcabl-accent/30" class="text-gray-300">Admin</router-link></li>
       </ul>
     </div>
   </nav>

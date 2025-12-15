@@ -28,6 +28,10 @@ export interface Player {
   number: number;
   /** Points per game average */
   pointsPerGame: number;
+  /** Email address (links to user account) */
+  email?: string;
+  /** Current team assignment (null if unassigned) */
+  teamId?: string | null;
 }
 
 /** Represents a player's performance in a specific game */
@@ -80,8 +84,6 @@ export interface Game {
   date: string;
   /** Game time (e.g., "7:00 PM") */
   time: string;
-  /** Game location/venue */
-  location: string;
   /** Current game status */
   status: 'scheduled' | 'live' | 'completed';
   /** Detailed game statistics (only for completed games) */

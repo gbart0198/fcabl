@@ -69,8 +69,7 @@ const formatDate = (dateStr: string): string => {
             <!-- View Details Link -->
             <div class="card-actions justify-end mt-4">
               <a href="#" class="btn btn-ghost btn-sm text-fcabl-accent">
-                View Details
-                <font-awesome-icon :icon="['fas', 'chevron-right']" class="ml-1" />
+                <font-awesome-icon :icon="['fas', 'chevron-right']" />
               </a>
             </div>
           </div>

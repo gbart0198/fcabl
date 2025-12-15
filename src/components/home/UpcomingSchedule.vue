@@ -37,7 +37,6 @@ const formatDate = (dateStr: string): string => {
               <th class="text-gray-400">Date</th>
               <th class="text-gray-400">Time</th>
               <th class="text-gray-400">Matchup</th>
-              <th class="text-gray-400"></th>
             </tr>
           </thead>
           <tbody>
@@ -54,11 +53,6 @@ const formatDate = (dateStr: string): string => {
                   <span class="text-gray-500">vs</span>
                   <span class="font-semibold text-white">{{ game.awayTeam }}</span>
                 </div>
-              </td>
-              <td>
-                <button class="btn btn-ghost btn-xs text-fcabl-accent">
-                  Details
-                </button>
               </td>
             </tr>
           </tbody>
@@ -90,13 +84,6 @@ const formatDate = (dateStr: string): string => {
               <span class="text-lg font-bold text-white">{{ game.homeTeam }}</span>
               <span class="text-fcabl-accent font-bold">VS</span>
               <span class="text-lg font-bold text-white">{{ game.awayTeam }}</span>
-            </div>
-
-            <!-- Action Button -->
-            <div class="card-actions justify-center mt-4">
-              <button class="btn btn-outline btn-sm text-fcabl-accent border-2 border-fcabl-accent hover:bg-fcabl-accent hover:text-fcabl-dark">
-                View Details
-              </button>
             </div>
           </div>
         </div>

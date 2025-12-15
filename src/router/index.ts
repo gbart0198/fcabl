@@ -3,6 +3,7 @@
  */
 
 import { createRouter, createWebHistory } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 import HomePage from '@/views/HomePage.vue';
 
 const router = createRouter({
@@ -38,6 +39,23 @@ const router = createRouter({
       component: () => import('@/views/SchedulePage.vue'),
       meta: {
         title: 'Schedule - FCABL',
+      },
+    },
+    {
+      path: '/admin',
+      name: 'admin',
+      component: () => import('@/views/AdminPage.vue'),
+      meta: {
+        title: 'Admin Dashboard - FCABL',
+        requiresAuth: true,
+      },
+      beforeEnter: (_to, _from, next) => {
+        const authStore = useAuthStore();
+        if (!authStore.isAuthenticated) {
+          next('/');
+        } else {
+          next();
+        }
       },
     },
   ],

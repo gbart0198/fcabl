@@ -249,12 +249,6 @@ const toggleGameDetails = (gameId: string) => {
                     <!-- Opponent -->
                     <span class="text-white font-semibold">{{ getOpponent(game) }}</span>
                   </div>
-                  
-                  <!-- Location -->
-                  <div class="text-center text-xs text-gray-500 mt-1">
-                    <font-awesome-icon :icon="['fas', 'map-marker-alt']" class="mr-1" />
-                    {{ game.location }}
-                  </div>
                 </div>
 
                 <!-- Scheduled Badge -->
