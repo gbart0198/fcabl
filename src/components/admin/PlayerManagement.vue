@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { adminService, teamService } from '@/services/api';
-import type { Team, Player } from '@/types/game.types';
+import type { Team, PlayerProfile } from '@/types/game.types';
 
 // State
 const teams = ref<Team[]>([]);
 const selectedTeamId = ref<string>('');
-const teamRoster = ref<Player[]>([]);
-const unassignedPlayers = ref<Player[]>([]);
+const teamRoster = ref<PlayerProfile[]>([]);
+const unassignedPlayers = ref<PlayerProfile[]>([]);
 const loading = ref(false);
 const successMessage = ref('');
 const errorMessage = ref('');
@@ -20,7 +20,7 @@ const itemsPerPageOptions = [5, 10, 25, 50, 100];
 
 // Modal state
 const showUpdateNumberModal = ref(false);
-const selectedPlayer = ref<Player | null>(null);
+const selectedPlayer = ref<PlayerProfile | null>(null);
 const newJerseyNumber = ref('');
 
 // Computed
@@ -33,7 +33,7 @@ const filteredUnassignedPlayers = computed(() => {
   
   const query = searchQuery.value.toLowerCase();
   return unassignedPlayers.value.filter(player => 
-    player.name.toLowerCase().includes(query) ||
+    player.fullName.toLowerCase().includes(query) ||
     (player.email && player.email.toLowerCase().includes(query))
   );
 });
@@ -112,7 +112,7 @@ const assignPlayerToTeam = async (playerId: string) => {
       jerseyNumber: undefined // Optional: could prompt for number
     };
     
-    await adminService.assignPlayerToTeam(assignData);
+    await adminService.assignPlayerToTeam(assignData.playerId, assignData.teamId, assignData.jerseyNumber);
     successMessage.value = 'Player assigned to team successfully';
     setTimeout(() => successMessage.value = '', 3000);
     
@@ -133,7 +133,7 @@ const removePlayerFromTeam = async (playerId: string) => {
   
   loading.value = true;
   try {
-    await adminService.removePlayerFromTeam(playerId);
+    await adminService.removePlayerFromTeam(playerId, selectedTeamId.value);
     successMessage.value = 'Player removed from team successfully';
     setTimeout(() => successMessage.value = '', 3000);
     
@@ -147,9 +147,9 @@ const removePlayerFromTeam = async (playerId: string) => {
   }
 };
 
-const openUpdateNumberModal = (player: Player) => {
+const openUpdateNumberModal = (player: PlayerProfile) => {
   selectedPlayer.value = player;
-  newJerseyNumber.value = player.number?.toString() || '';
+  newJerseyNumber.value = player.jerseyNumber?.toString() || '';
   showUpdateNumberModal.value = true;
 };
 
@@ -171,7 +171,7 @@ const updatePlayerNumber = async () => {
   
   loading.value = true;
   try {
-    await adminService.updatePlayerNumber(selectedPlayer.value.id, number);
+    await adminService.updatePlayerNumber(selectedPlayer.value.id, selectedTeamId.value, number);
     successMessage.value = 'Jersey number updated successfully';
     setTimeout(() => successMessage.value = '', 3000);
     
@@ -279,8 +279,8 @@ onMounted(() => {
                 </thead>
                 <tbody>
                   <tr v-for="player in teamRoster" :key="player.id">
-                    <td class="text-white font-bold">{{ player.number || '-' }}</td>
-                    <td class="text-white">{{ player.name }}</td>
+                    <td class="text-white font-bold">{{ player.jerseyNumber || '-' }}</td>
+                    <td class="text-white">{{ player.fullName }}</td>
                     <td class="text-gray-400 text-sm">{{ player.email || '-' }}</td>
                     <td>
                       <div class="flex gap-2">
@@ -366,7 +366,7 @@ onMounted(() => {
                   </thead>
                   <tbody>
                     <tr v-for="player in paginatedPlayers" :key="player.id">
-                      <td class="text-white">{{ player.name }}</td>
+                      <td class="text-white">{{ player.fullName }}</td>
                       <td class="text-gray-400 text-sm">{{ player.email || 'No email' }}</td>
                       <td>
                         <button 
@@ -452,7 +452,7 @@ onMounted(() => {
         
         <div v-if="selectedPlayer" class="space-y-4">
           <p class="text-gray-400">
-            Update jersey number for <span class="font-bold text-white">{{ selectedPlayer.name }}</span>
+            Update jersey number for <span class="font-bold text-white">{{ selectedPlayer.fullName }}</span>
           </p>
           
           <div class="form-control w-full">

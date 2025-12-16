@@ -2,39 +2,185 @@
  * Basketball game and team related types
  */
 
-/** Represents a basketball team */
+// ==================
+// BASE TYPES (Backend Models - 1:1 mapping)
+// ==================
+
+/**
+ * Basketball team
+ * Matches backend Team model exactly (1:1 mapping with JSON tags)
+ * Maps to: backend/internal/repository/models.go Team struct
+ */
 export interface Team {
   /** Unique identifier for the team */
-  id: string;
+  id: string;                    // json:"id"
+  
   /** Team name */
-  name: string;
+  name: string;                  // json:"name"
+  
   /** Number of wins */
-  wins: number;
+  wins: number;                  // json:"wins"
+  
   /** Number of losses */
-  losses: number;
-  /** Win percentage (0-1) */
-  winPercentage: number;
-  /** Optional team logo URL */
-  logo?: string;
+  losses: number;                // json:"losses"
+  
+  /** Number of draws */
+  draws: number;                 // json:"draws"
+  
+  /** Total points scored by team */
+  pointsFor: number;             // json:"pointsFor"
+  
+  /** Total points allowed by team */
+  pointsAgainst: number;         // json:"pointsAgainst"
+  
+  /** Timestamp when team was created (ISO 8601 format: "2024-02-10T16:00:00") */
+  createdAt: string;             // json:"createdAt"
+  
+  /** Timestamp when team was last updated (ISO 8601 format: "2024-02-10T16:00:00") */
+  updatedAt: string;             // json:"updatedAt"
 }
 
-/** Represents a basketball player */
+/**
+ * Player registration and team assignment
+ * Matches backend Player model exactly (1:1 mapping with JSON tags)
+ * Maps to: backend/internal/repository/models.go Player struct
+ * 
+ * NOTE: This is the base player record. For display with user info, use PlayerProfile
+ */
 export interface Player {
   /** Unique identifier for the player */
-  id: string;
-  /** Player name */
-  name: string;
-  /** Jersey number */
-  number: number;
-  /** Points per game average */
-  pointsPerGame: number;
-  /** Email address (links to user account) */
-  email?: string;
-  /** Current team assignment (null if unassigned) */
-  teamId?: string | null;
+  id: string;                    // json:"id"
+  
+  /** ID of the user account (links to User.id) */
+  userId: string;                // json:"userId"
+  
+  /** ID of the team (null if unassigned) */
+  teamId: string | null;         // json:"teamId" - nullable
+  
+  /** Registration fee amount due (null if paid in full) */
+  registrationFeeDue: number | null; // json:"registrationFeeDue" - decimal
+  
+  /** Whether player has completed full registration */
+  isFullyRegistered: boolean;    // json:"isFullyRegistered"
+  
+  /** Whether player is active in the league */
+  isActive: boolean;             // json:"isActive"
+  
+  /** Player's jersey number (null if not assigned) */
+  jerseyNumber: number | null;   // json:"jerseyNumber" - nullable
+  
+  /** Timestamp when player was created (ISO 8601 format: "2024-02-10T16:00:00") */
+  createdAt: string;             // json:"createdAt"
+  
+  /** Timestamp when player was last updated (ISO 8601 format: "2024-02-10T16:00:00") */
+  updatedAt: string;             // json:"updatedAt"
 }
 
-/** Represents a player's performance in a specific game */
+/**
+ * Scheduled game
+ * Matches backend Game model exactly (1:1 mapping with JSON tags)
+ * Maps to: backend/internal/repository/models.go Game struct
+ * 
+ * NOTE: This only contains schedule info. For scores, see GameResult type
+ */
+export interface Game {
+  /** Unique identifier for the game */
+  id: string;                    // json:"id"
+  
+  /** Home team ID */
+  homeTeamId: string;            // json:"homeTeamId"
+  
+  /** Away team ID */
+  awayTeamId: string;            // json:"awayTeamId"
+  
+  /** Scheduled game time (ISO 8601 format: "2024-02-10T16:00:00") */
+  gameTime: string;              // json:"gameTime"
+  
+  /** Timestamp when game was created (ISO 8601 format: "2024-02-10T16:00:00") */
+  createdAt: string;             // json:"createdAt"
+  
+  /** Timestamp when game was last updated (ISO 8601 format: "2024-02-10T16:00:00") */
+  updatedAt: string;             // json:"updatedAt"
+}
+
+// ==================
+// COMPOSITE TYPES (Frontend Convenience Types)
+// ==================
+
+/**
+ * Player with full user information
+ * Combines Player + User data for display purposes
+ * This is what most components should use instead of base Player type
+ */
+export interface PlayerProfile extends Player {
+  /** User's email address (from User.email) */
+  email: string;
+  
+  /** User's phone number (from User.phoneNumber) */
+  phoneNumber: string;
+  
+  /** User's first name (from User.firstName) */
+  firstName: string;
+  
+  /** User's last name (from User.lastName) */
+  lastName: string;
+  
+  /** User's role (from User.role) */
+  role: string;
+  
+  /** Computed full name (firstName + lastName) */
+  fullName: string;
+}
+
+/**
+ * Team with computed statistics
+ * Extends base Team with calculated fields for display
+ */
+export interface TeamWithStats extends Team {
+  /** Win percentage (0-1), computed: wins / (wins + losses + draws) */
+  winPercentage: number;
+  
+  /** Point differential, computed: pointsFor - pointsAgainst */
+  pointDifferential: number;
+  
+  /** Total games played, computed: wins + losses + draws */
+  gamesPlayed: number;
+  
+  /** Average points scored per game, computed: pointsFor / gamesPlayed */
+  avgPointsFor: number;
+  
+  /** Average points allowed per game, computed: pointsAgainst / gamesPlayed */
+  avgPointsAgainst: number;
+}
+
+/**
+ * Game with full details including team names, scores, and status
+ * Used for displaying game information in UI
+ */
+export interface GameWithDetails extends Game {
+  /** Home team name (from Team.name) */
+  homeTeamName: string;
+  
+  /** Away team name (from Team.name) */
+  awayTeamName: string;
+  
+  /** Home team final score (from GameResult.homeScore if exists) */
+  homeScore?: number;
+  
+  /** Away team final score (from GameResult.awayScore if exists) */
+  awayScore?: number;
+  
+  /** Game status: scheduled, live, or completed (computed) */
+  status: 'scheduled' | 'live' | 'completed';
+  
+  /** Detailed game statistics (only for completed games) */
+  details?: GameDetails;
+}
+
+/**
+ * Player's performance in a specific game
+ * Used for game statistics display
+ */
 export interface PlayerGameStats {
   /** Player ID */
   playerId: string;
@@ -46,7 +192,10 @@ export interface PlayerGameStats {
   points: number;
 }
 
-/** Represents detailed game statistics */
+/**
+ * Detailed game statistics
+ * Used for displaying half-time scores and player stats
+ */
 export interface GameDetails {
   /** Game ID */
   gameId: string;
@@ -64,70 +213,32 @@ export interface GameDetails {
   awayPlayerStats: PlayerGameStats[];
 }
 
-/** Represents a basketball game */
-export interface Game {
-  /** Unique identifier for the game */
-  id: string;
-  /** Home team name */
-  homeTeam: string;
-  /** Home team ID */
-  homeTeamId: string;
-  /** Away team name */
-  awayTeam: string;
-  /** Away team ID */
-  awayTeamId: string;
-  /** Home team final score */
-  homeScore?: number;
-  /** Away team final score */
-  awayScore?: number;
-  /** Game date (YYYY-MM-DD format) */
-  date: string;
-  /** Game time (e.g., "7:00 PM") */
-  time: string;
-  /** Current game status */
-  status: 'scheduled' | 'live' | 'completed';
-  /** Detailed game statistics (only for completed games) */
-  details?: GameDetails;
+/**
+ * Team's standing in the league
+ * Used for standings table display
+ */
+export interface Standing {
+  /** Current rank position */
+  rank: number;
+  /** Team information with statistics */
+  team: TeamWithStats;
+  /** Current win/loss streak (e.g., "W3" or "L2") */
+  streak?: string;
 }
 
-/** Extended team details with roster, games, and stats */
-export interface TeamDetail extends Team {
+/**
+ * Extended team details with roster, games, and additional info
+ * Used for team detail pages
+ */
+export interface TeamDetail extends TeamWithStats {
   /** Team coach name */
   coach?: string;
   /** Home venue location */
   homeVenue?: string;
-  /** Team roster */
-  roster: Player[];
-  /** All team games (past and future) */
-  games: Game[];
-  /** Total points scored */
-  pointsFor: number;
-  /** Total points allowed */
-  pointsAgainst: number;
-  /** Average points scored per game */
-  avgPointsFor: number;
-  /** Average points allowed per game */
-  avgPointsAgainst: number;
-}
-
-/** Represents a team's standing in the league */
-export interface Standing {
-  /** Current rank position */
-  rank: number;
-  /** Team information */
-  team: Team;
-  /** Number of wins */
-  wins: number;
-  /** Number of losses */
-  losses: number;
-  /** Win percentage (0-1) */
-  winPercentage: number;
-  /** Total points scored */
-  pointsFor: number;
-  /** Total points allowed */
-  pointsAgainst: number;
-  /** Point differential (PF - PA) */
-  pointDifferential: number;
-  /** Current win/loss streak (e.g., "W3" or "L2") */
-  streak?: string;
+  /** Team logo URL */
+  logo?: string;
+  /** Team roster with full player profiles */
+  roster: PlayerProfile[];
+  /** All team games with details */
+  games: GameWithDetails[];
 }

@@ -2,16 +2,37 @@
  * User authentication and profile types
  */
 
-/** Represents a user in the system */
+/**
+ * User account from backend
+ * Matches backend User model exactly (1:1 mapping with JSON tags)
+ * Maps to: backend/internal/repository/models.go User struct
+ * 
+ * NOTE: passwordHash field is server-side only and never sent to frontend
+ */
 export interface User {
   /** Unique identifier for the user */
-  id: string;
-  /** User's full name */
-  name: string;
+  id: string;                    // json:"id"
+  
   /** User's email address */
-  email: string;
-  /** User's role in the system */
-  role?: 'player' | 'admin' | 'coach';
+  email: string;                 // json:"email"
+  
+  /** User's phone number */
+  phoneNumber: string;           // json:"phoneNumber"
+  
+  /** User's first name */
+  firstName: string;             // json:"firstName"
+  
+  /** User's last name */
+  lastName: string;              // json:"lastName"
+  
+  /** User's role in the system (e.g., 'player', 'admin', 'coach') */
+  role: string;                  // json:"role"
+  
+  /** Timestamp when user was created (ISO 8601 format: "2024-02-10T16:00:00") */
+  createdAt: string;             // json:"createdAt"
+  
+  /** Timestamp when user was last updated (ISO 8601 format: "2024-02-10T16:00:00") */
+  updatedAt: string;             // json:"updatedAt"
 }
 
 /** Login form credentials */
@@ -26,10 +47,14 @@ export interface LoginCredentials {
 
 /** Registration form data */
 export interface RegisterData {
-  /** User's full name */
-  name: string;
+  /** User's first name */
+  firstName: string;
+  /** User's last name */
+  lastName: string;
   /** User's email address */
   email: string;
+  /** User's phone number */
+  phoneNumber: string;
   /** User's chosen password */
   password: string;
   /** Password confirmation for validation */

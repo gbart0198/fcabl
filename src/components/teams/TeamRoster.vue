@@ -1,21 +1,17 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import type { Player } from '@/types/game.types';
+import type { PlayerProfile } from '@/types/game.types';
 
 interface Props {
-  roster: Player[];
+  roster: PlayerProfile[];
 }
 
 const props = defineProps<Props>();
 
 const sortedRoster = computed(() => {
-  return [...props.roster].sort((a, b) => a.number - b.number);
+  return [...props.roster].sort((a, b) => (a.jerseyNumber || 99) - (b.jerseyNumber || 99));
 });
-
-const formatPPG = (ppg: number): string => {
-  return ppg.toFixed(1);
-};
 </script>
 
 <template>
@@ -32,7 +28,6 @@ const formatPPG = (ppg: number): string => {
           <tr class="border-b border-gray-700">
             <th class="text-gray-400 text-center">#</th>
             <th class="text-gray-400">Player Name</th>
-            <th class="text-gray-400 text-center">PPG</th>
           </tr>
         </thead>
         <tbody>
@@ -43,14 +38,11 @@ const formatPPG = (ppg: number): string => {
           >
             <td class="text-center">
               <span class="badge badge-lg bg-fcabl-blue text-white border-0 font-bold">
-                {{ player.number }}
+                {{ player.jerseyNumber || '-' }}
               </span>
             </td>
             <td>
-              <span class="font-semibold text-white text-lg">{{ player.name }}</span>
-            </td>
-            <td class="text-center">
-              <span class="font-semibold text-fcabl-accent text-lg">{{ formatPPG(player.pointsPerGame) }}</span>
+              <span class="font-semibold text-white text-lg">{{ player.fullName }}</span>
             </td>
           </tr>
         </tbody>
@@ -65,18 +57,12 @@ const formatPPG = (ppg: number): string => {
         class="card bg-fcabl-dark-light shadow-lg"
       >
         <div class="card-body p-4">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="badge badge-lg bg-fcabl-blue text-white border-0 font-bold text-xl w-12 h-12">
-                {{ player.number }}
-              </div>
-              <div>
-                <h4 class="font-semibold text-white text-lg">{{ player.name }}</h4>
-              </div>
+          <div class="flex items-center gap-3">
+            <div class="badge badge-lg bg-fcabl-blue text-white border-0 font-bold text-xl w-12 h-12">
+              {{ player.jerseyNumber || '-' }}
             </div>
-            <div class="text-right">
-              <div class="text-2xl font-bold text-fcabl-accent">{{ formatPPG(player.pointsPerGame) }}</div>
-              <div class="text-xs text-gray-400">PPG</div>
+            <div>
+              <h4 class="font-semibold text-white text-lg">{{ player.fullName }}</h4>
             </div>
           </div>
         </div>

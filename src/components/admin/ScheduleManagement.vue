@@ -2,11 +2,12 @@
 import { ref, computed, onMounted } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { scheduleService, teamService, adminService } from '@/services/api';
-import type { Game, Team } from '@/types/game.types';
+import type { GameWithDetails, Team } from '@/types/game.types';
 import type { CreateGameData, UpdateGameData } from '@/types/admin.types';
+import { formatGameDate, formatGameTime } from '@/utils/game';
 
 // State
-const games = ref<Game[]>([]);
+const games = ref<GameWithDetails[]>([]);
 const teams = ref<Team[]>([]);
 const loading = ref(false);
 const saving = ref(false);
@@ -16,9 +17,9 @@ const filterStatus = ref<'all' | 'scheduled' | 'completed'>('all');
 
 // Modal state
 const showModal = ref(false);
-const editingGame = ref<Game | null>(null);
+const editingGame = ref<GameWithDetails | null>(null);
 const showDeleteDialog = ref(false);
-const deletingGame = ref<Game | null>(null);
+const deletingGame = ref<GameWithDetails | null>(null);
 
 // Form state
 const formData = ref({
@@ -53,7 +54,7 @@ async function loadData() {
       teamService.getAllTeams(),
     ]);
     games.value = gamesData.sort((a, b) => 
-      new Date(a.date).getTime() - new Date(b.date).getTime()
+      new Date(a.gameTime).getTime() - new Date(b.gameTime).getTime()
     );
     teams.value = teamsData;
   } catch (err) {
@@ -78,14 +79,14 @@ function openCreateModal() {
   showModal.value = true;
 }
 
-function openEditModal(game: Game) {
+function openEditModal(game: GameWithDetails) {
   editingGame.value = game;
   formData.value = {
     homeTeamId: game.homeTeamId,
     awayTeamId: game.awayTeamId,
-    date: game.date,
-    time: game.time,
-    status: game.status,
+    date: formatGameDate(game.gameTime),
+    time: formatGameTime(game.gameTime),
+    status: game.status as 'scheduled' | 'completed',
     homeScore: game.homeScore,
     awayScore: game.awayScore,
   };
@@ -158,7 +159,7 @@ async function submitForm() {
   }
 }
 
-function openDeleteDialog(game: Game) {
+function openDeleteDialog(game: GameWithDetails) {
   deletingGame.value = game;
   showDeleteDialog.value = true;
 }
@@ -195,6 +196,11 @@ async function confirmDelete() {
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function formatTime(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
 }
 
 onMounted(() => {
@@ -263,10 +269,10 @@ onMounted(() => {
           </thead>
           <tbody>
             <tr v-for="game in filteredGames" :key="game.id" class="hover:bg-fcabl-dark/50 border-b border-gray-800">
-              <td class="text-white">{{ formatDate(game.date) }}</td>
-              <td class="text-gray-300">{{ game.time }}</td>
+              <td class="text-white">{{ formatDate(game.gameTime) }}</td>
+              <td class="text-gray-300">{{ formatTime(game.gameTime) }}</td>
               <td class="text-white">
-                {{ game.homeTeam }} <span class="text-gray-500">vs</span> {{ game.awayTeam }}
+                {{ game.homeTeamName }} <span class="text-gray-500">vs</span> {{ game.awayTeamName }}
                 <template v-if="game.homeScore !== undefined">
                   <br>
                   <span class="text-sm text-fcabl-accent">{{ game.homeScore }} - {{ game.awayScore }}</span>
@@ -297,13 +303,13 @@ onMounted(() => {
         <div v-for="game in filteredGames" :key="game.id" class="bg-fcabl-dark-light rounded-lg p-4">
           <!-- Date & Time -->
           <div class="text-xs text-gray-400 mb-2">
-            {{ formatDate(game.date) }} • {{ game.time }}
+            {{ formatDate(game.gameTime) }} • {{ formatTime(game.gameTime) }}
           </div>
           
           <!-- Matchup -->
           <div class="text-center mb-3">
             <div class="font-semibold text-white">
-              {{ game.homeTeam }}
+              {{ game.homeTeamName }}
             </div>
             <div class="text-fcabl-accent my-1">
               <template v-if="game.homeScore !== undefined">
@@ -314,7 +320,7 @@ onMounted(() => {
               </template>
             </div>
             <div class="font-semibold text-white">
-              {{ game.awayTeam }}
+              {{ game.awayTeamName }}
             </div>
           </div>
           
@@ -386,7 +392,7 @@ onMounted(() => {
           <div v-else class="p-4 bg-fcabl-dark rounded-lg">
             <p class="text-gray-400 text-sm mb-2">Matchup (cannot be changed)</p>
             <p class="text-white text-lg font-semibold">
-              {{ editingGame.homeTeam }} <span class="text-fcabl-accent">vs</span> {{ editingGame.awayTeam }}
+              {{ editingGame.homeTeamName }} <span class="text-fcabl-accent">vs</span> {{ editingGame.awayTeamName }}
             </p>
           </div>
 
@@ -468,8 +474,8 @@ onMounted(() => {
 
         <p v-if="deletingGame" class="text-gray-300 mb-4">
           Are you sure you want to delete this game?<br>
-          <strong class="text-white">{{ deletingGame.homeTeam }} vs {{ deletingGame.awayTeam }}</strong><br>
-          <span class="text-gray-400 text-sm">{{ formatDate(deletingGame.date) }} at {{ deletingGame.time }}</span>
+          <strong class="text-white">{{ deletingGame.homeTeamName }} vs {{ deletingGame.awayTeamName }}</strong><br>
+          <span class="text-gray-400 text-sm">{{ formatDate(deletingGame.gameTime) }} at {{ formatTime(deletingGame.gameTime) }}</span>
         </p>
 
         <div class="modal-action">

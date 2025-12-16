@@ -2,11 +2,12 @@
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { mockUpcomingGames } from '@/data/mockData';
 import { RouterLink } from 'vue-router';
+import { formatGameDate, formatGameTime } from '@/utils/game';
 
 const games = mockUpcomingGames;
 
-const formatDate = (dateStr: string): string => {
-  const date = new Date(dateStr);
+const formatDateForMobile = (gameTime: string): string => {
+  const date = new Date(gameTime);
   return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 };
 </script>
@@ -45,13 +46,13 @@ const formatDate = (dateStr: string): string => {
               :key="game.id"
               class="hover:bg-fcabl-dark/50 transition-colors border-b border-gray-800"
             >
-              <td class="font-semibold text-white">{{ formatDate(game.date) }}</td>
-              <td class="text-gray-300">{{ game.time }}</td>
+              <td class="font-semibold text-white">{{ formatGameDate(game.gameTime) }}</td>
+              <td class="text-gray-300">{{ formatGameTime(game.gameTime) }}</td>
               <td>
                 <div class="flex items-center gap-2">
-                  <span class="font-semibold text-white">{{ game.homeTeam }}</span>
+                  <span class="font-semibold text-white">{{ game.homeTeamName }}</span>
                   <span class="text-gray-500">vs</span>
-                  <span class="font-semibold text-white">{{ game.awayTeam }}</span>
+                  <span class="font-semibold text-white">{{ game.awayTeamName }}</span>
                 </div>
               </td>
             </tr>
@@ -70,20 +71,20 @@ const formatDate = (dateStr: string): string => {
             <!-- Date and Time -->
             <div class="flex items-center gap-3 mb-3">
               <div class="bg-fcabl-accent text-fcabl-dark rounded-lg p-3 text-center min-w-[60px]">
-                <div class="text-xs font-semibold">{{ new Date(game.date).toLocaleDateString('en-US', { month: 'short' }).toUpperCase() }}</div>
-                <div class="text-2xl font-bold">{{ new Date(game.date).getDate() }}</div>
+                <div class="text-xs font-semibold">{{ new Date(game.gameTime).toLocaleDateString('en-US', { month: 'short' }).toUpperCase() }}</div>
+                <div class="text-2xl font-bold">{{ new Date(game.gameTime).getDate() }}</div>
               </div>
               <div>
-                <div class="text-sm text-gray-400">{{ formatDate(game.date) }}</div>
-                <div class="text-lg font-semibold text-white">{{ game.time }}</div>
+                <div class="text-sm text-gray-400">{{ formatDateForMobile(game.gameTime) }}</div>
+                <div class="text-lg font-semibold text-white">{{ formatGameTime(game.gameTime) }}</div>
               </div>
             </div>
 
             <!-- Teams -->
             <div class="flex items-center justify-center gap-3 my-4">
-              <span class="text-lg font-bold text-white">{{ game.homeTeam }}</span>
+              <span class="text-lg font-bold text-white">{{ game.homeTeamName }}</span>
               <span class="text-fcabl-accent font-bold">VS</span>
-              <span class="text-lg font-bold text-white">{{ game.awayTeam }}</span>
+              <span class="text-lg font-bold text-white">{{ game.awayTeamName }}</span>
             </div>
           </div>
         </div>

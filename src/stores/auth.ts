@@ -6,6 +6,7 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { authService } from '@/services/api';
 import type { User, LoginCredentials, RegisterData } from '@/types/auth.types';
+import { getUserFullName } from '@/utils/user';
 
 /**
  * Authentication store
@@ -28,6 +29,9 @@ export const useAuthStore = defineStore('auth', () => {
   // Computed
   /** Whether a user is currently authenticated */
   const isAuthenticated = computed(() => !!token.value && !!user.value);
+  
+  /** Current user's full name (computed from firstName + lastName) */
+  const userFullName = computed(() => user.value ? getUserFullName(user.value) : '');
 
   // Actions
   /**
@@ -138,6 +142,7 @@ export const useAuthStore = defineStore('auth', () => {
     error,
     // Computed
     isAuthenticated,
+    userFullName,
     // Actions
     login,
     register,

@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import type { Game } from '@/types/game.types';
+import type { GameWithDetails } from '@/types/game.types';
+import { formatGameDate, formatGameTime } from '@/utils/game';
 
 interface Props {
-  games: Game[];
+  games: GameWithDetails[];
   teamId: string;
 }
 
@@ -14,9 +15,7 @@ const expandedGameIds = ref<Set<string>>(new Set());
 
 const sortedGames = computed(() => {
   return [...props.games].sort((a, b) => {
-    const dateA = new Date(a.date + ' ' + a.time).getTime();
-    const dateB = new Date(b.date + ' ' + b.time).getTime();
-    return dateA - dateB;
+    return new Date(a.gameTime).getTime() - new Date(b.gameTime).getTime();
   });
 });
 
@@ -30,11 +29,11 @@ const upcomingGames = computed(() => {
   return sortedGames.value.filter(g => g.status === 'scheduled');
 });
 
-const isHomeGame = (game: Game): boolean => {
+const isHomeGame = (game: GameWithDetails): boolean => {
   return game.homeTeamId === props.teamId;
 };
 
-const getGameResult = (game: Game): 'W' | 'L' | null => {
+const getGameResult = (game: GameWithDetails): 'W' | 'L' | null => {
   if (game.status !== 'completed') return null;
   
   const isHome = isHomeGame(game);
@@ -44,22 +43,16 @@ const getGameResult = (game: Game): 'W' | 'L' | null => {
   return teamScore! > oppScore! ? 'W' : 'L';
 };
 
-const getOpponent = (game: Game): string => {
-  return isHomeGame(game) ? game.awayTeam : game.homeTeam;
+const getOpponent = (game: GameWithDetails): string => {
+  return isHomeGame(game) ? game.awayTeamName : game.homeTeamName;
 };
 
-const getTeamScore = (game: Game): number | undefined => {
+const getTeamScore = (game: GameWithDetails): number | undefined => {
   return isHomeGame(game) ? game.homeScore : game.awayScore;
 };
 
-const getOpponentScore = (game: Game): number | undefined => {
+const getOpponentScore = (game: GameWithDetails): number | undefined => {
   return isHomeGame(game) ? game.awayScore : game.homeScore;
-};
-
-const formatDate = (dateString: string): string => {
-  const date = new Date(dateString);
-  const options: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: 'numeric' };
-  return date.toLocaleDateString('en-US', options);
 };
 
 const isExpanded = (gameId: string): boolean => {
@@ -99,8 +92,8 @@ const toggleGameDetails = (gameId: string) => {
               <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <!-- Date & Time -->
                 <div class="text-xs text-gray-400 sm:w-24">
-                  <div class="font-semibold">{{ formatDate(game.date) }}</div>
-                  <div>{{ game.time }}</div>
+                  <div class="font-semibold">{{ formatGameDate(game.gameTime) }}</div>
+                  <div>{{ formatGameTime(game.gameTime) }}</div>
                 </div>
 
                 <!-- Score & Opponent -->
@@ -150,7 +143,7 @@ const toggleGameDetails = (gameId: string) => {
                 <div class="grid grid-cols-2 gap-4">
                   <!-- Away Team Halves -->
                   <div class="text-center">
-                    <div class="text-xs text-gray-400 mb-1">{{ game.awayTeam }}</div>
+                    <div class="text-xs text-gray-400 mb-1">{{ game.awayTeamName }}</div>
                     <div class="flex justify-center gap-4 text-sm">
                       <span class="text-white">
                         <span class="text-gray-500">1st:</span> {{ game.details.awayFirstHalf }}
@@ -162,7 +155,7 @@ const toggleGameDetails = (gameId: string) => {
                   </div>
                   <!-- Home Team Halves -->
                   <div class="text-center">
-                    <div class="text-xs text-gray-400 mb-1">{{ game.homeTeam }}</div>
+                    <div class="text-xs text-gray-400 mb-1">{{ game.homeTeamName }}</div>
                     <div class="flex justify-center gap-4 text-sm">
                       <span class="text-white">
                         <span class="text-gray-500">1st:</span> {{ game.details.homeFirstHalf }}
@@ -179,7 +172,7 @@ const toggleGameDetails = (gameId: string) => {
               <div class="grid md:grid-cols-2 gap-4">
                 <!-- Away Team Players -->
                 <div>
-                  <h4 class="text-sm font-semibold text-gray-400 mb-2 uppercase">{{ game.awayTeam }} - Players</h4>
+                  <h4 class="text-sm font-semibold text-gray-400 mb-2 uppercase">{{ game.awayTeamName }} - Players</h4>
                   <div class="space-y-1">
                     <div 
                       v-for="player in game.details.awayPlayerStats"
@@ -197,7 +190,7 @@ const toggleGameDetails = (gameId: string) => {
 
                 <!-- Home Team Players -->
                 <div>
-                  <h4 class="text-sm font-semibold text-gray-400 mb-2 uppercase">{{ game.homeTeam }} - Players</h4>
+                  <h4 class="text-sm font-semibold text-gray-400 mb-2 uppercase">{{ game.homeTeamName }} - Players</h4>
                   <div class="space-y-1">
                     <div 
                       v-for="player in game.details.homePlayerStats"
@@ -234,8 +227,8 @@ const toggleGameDetails = (gameId: string) => {
               <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <!-- Date & Time -->
                 <div class="text-xs text-gray-300 sm:w-24">
-                  <div class="font-semibold">{{ formatDate(game.date) }}</div>
-                  <div>{{ game.time }}</div>
+                  <div class="font-semibold">{{ formatGameDate(game.gameTime) }}</div>
+                  <div>{{ formatGameTime(game.gameTime) }}</div>
                 </div>
 
                 <!-- Opponent -->

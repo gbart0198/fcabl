@@ -58,7 +58,7 @@ const handleLogout = async () => {
           <div class="dropdown dropdown-end">
             <label tabindex="0" class="btn btn-ghost btn-sm text-gray-300">
               <font-awesome-icon :icon="['fas', 'user']" class="mr-2" />
-              {{ authStore.user?.name }}
+              {{ authStore.userFullName }}
             </label>
             <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-fcabl-dark-light rounded-box w-52 mt-2">
               <li><a href="#" class="text-gray-300">Profile</a></li>
@@ -88,7 +88,7 @@ const handleLogout = async () => {
               <font-awesome-icon :icon="['fas', 'user']" />
             </label>
             <ul tabindex="0" class="dropdown-content z-[60] menu p-2 shadow-xl bg-fcabl-dark-light rounded-box w-52 mt-2 right-0">
-              <li class="menu-title text-gray-400">{{ authStore.user?.name }}</li>
+              <li class="menu-title text-gray-400">{{ authStore.userFullName }}</li>
               <li><a href="#" class="text-gray-300">Profile</a></li>
               <li><a href="#" class="text-gray-300">Settings</a></li>
               <li><a @click="handleLogout" class="text-error">Logout</a></li>

@@ -18,8 +18,10 @@ const authStore = useAuthStore();
 
 // Form data
 const formData = ref<RegisterData>({
-  name: '',
+  firstName: '',
+  lastName: '',
   email: '',
+  phoneNumber: '',
   password: '',
   confirmPassword: '',
   agreeToTerms: false,
@@ -27,8 +29,10 @@ const formData = ref<RegisterData>({
 
 // Form errors
 const errors = ref({
-  name: '',
+  firstName: '',
+  lastName: '',
   email: '',
+  phoneNumber: '',
   password: '',
   confirmPassword: '',
   agreeToTerms: '',
@@ -36,19 +40,36 @@ const errors = ref({
 
 // Form touched state
 const touched = ref({
-  name: false,
+  firstName: false,
+  lastName: false,
   email: false,
+  phoneNumber: false,
   password: false,
   confirmPassword: false,
   agreeToTerms: false,
 });
 
 // Validate individual fields
-const validateName = () => {
-  if (!touched.value.name) return;
-  errors.value.name = validateField(formData.value.name, [
-    { validate: validators.required, message: 'Name is required' },
-    { validate: validators.minLength(2), message: 'Name must be at least 2 characters' },
+const validateFirstName = () => {
+  if (!touched.value.firstName) return;
+  errors.value.firstName = validateField(formData.value.firstName, [
+    { validate: validators.required, message: 'First name is required' },
+    { validate: validators.minLength(2), message: 'First name must be at least 2 characters' },
+  ]);
+};
+
+const validateLastName = () => {
+  if (!touched.value.lastName) return;
+  errors.value.lastName = validateField(formData.value.lastName, [
+    { validate: validators.required, message: 'Last name is required' },
+    { validate: validators.minLength(2), message: 'Last name must be at least 2 characters' },
+  ]);
+};
+
+const validatePhoneNumber = () => {
+  if (!touched.value.phoneNumber) return;
+  errors.value.phoneNumber = validateField(formData.value.phoneNumber, [
+    { validate: validators.required, message: 'Phone number is required' },
   ]);
 };
 
@@ -93,12 +114,12 @@ const markTouched = (field: keyof typeof touched.value) => {
 // Check if form is valid
 const isFormValid = computed(() => {
   return (
-    formData.value.name &&
+    formData.value.firstName &&
     formData.value.email &&
     formData.value.password &&
     formData.value.confirmPassword &&
     formData.value.agreeToTerms &&
-    !errors.value.name &&
+    !errors.value.firstName && !errors.value.lastName && !errors.value.phoneNumber &&
     !errors.value.email &&
     !errors.value.password &&
     !errors.value.confirmPassword
@@ -108,14 +129,14 @@ const isFormValid = computed(() => {
 // Handle form submission
 const handleSubmit = async () => {
   // Mark all fields as touched
-  touched.value.name = true;
+  touched.value.firstName = true;
   touched.value.email = true;
   touched.value.password = true;
   touched.value.confirmPassword = true;
   touched.value.agreeToTerms = true;
 
   // Validate all fields
-  validateName();
+  validateFirstName(); validateLastName(); validatePhoneNumber();
   validateEmail();
   validatePassword();
   validateConfirmPassword();
@@ -130,22 +151,28 @@ const handleSubmit = async () => {
   if (success) {
     // Reset form
     formData.value = {
-      name: '',
+      firstName: '',
+      lastName: '',
       email: '',
+      phoneNumber: '',
       password: '',
       confirmPassword: '',
       agreeToTerms: false,
     };
     touched.value = {
-      name: false,
+      firstName: false,
+      lastName: false,
       email: false,
+      phoneNumber: false,
       password: false,
       confirmPassword: false,
       agreeToTerms: false,
     };
     errors.value = {
-      name: '',
+      firstName: '',
+      lastName: '',
       email: '',
+      phoneNumber: '',
       password: '',
       confirmPassword: '',
       agreeToTerms: '',
@@ -157,22 +184,28 @@ const handleSubmit = async () => {
 const handleClose = () => {
   // Reset form state
   formData.value = {
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
+    phoneNumber: '',
     password: '',
     confirmPassword: '',
     agreeToTerms: false,
   };
   touched.value = {
-    name: false,
+    firstName: false,
+    lastName: false,
     email: false,
+    phoneNumber: false,
     password: false,
     confirmPassword: false,
     agreeToTerms: false,
   };
   errors.value = {
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
+    phoneNumber: '',
     password: '',
     confirmPassword: '',
     agreeToTerms: '',
@@ -201,22 +234,60 @@ const handleClose = () => {
 
       <!-- Register Form -->
       <form @submit.prevent="handleSubmit" class="space-y-4">
-        <!-- Name Field -->
+        <!-- First Name Field -->
         <div class="form-control">
           <label class="label">
-            <span class="label-text">Full Name</span>
+            <span class="label-text">First Name</span>
           </label>
           <input
-            v-model="formData.name"
-            @blur="markTouched('name'); validateName()"
-            @input="validateName"
+            v-model="formData.firstName"
+            @blur="markTouched('firstName'); validateFirstName()"
+            @input="validateFirstName"
             type="text"
-            placeholder="John Doe"
+            placeholder="John"
             class="input input-bordered w-full"
-            :class="{ 'input-error': errors.name && touched.name }"
+            :class="{ 'input-error': errors.firstName && touched.firstName }"
           />
-          <label v-if="errors.name && touched.name" class="label">
-            <span class="label-text-alt text-error break-words whitespace-normal">{{ errors.name }}</span>
+          <label v-if="errors.firstName && touched.firstName" class="label">
+            <span class="label-text-alt text-error break-words whitespace-normal">{{ errors.firstName }}</span>
+          </label>
+        </div>
+
+        <!-- Last Name Field -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Last Name</span>
+          </label>
+          <input
+            v-model="formData.lastName"
+            @blur="markTouched('lastName'); validateLastName()"
+            @input="validateLastName"
+            type="text"
+            placeholder="Doe"
+            class="input input-bordered w-full"
+            :class="{ 'input-error': errors.lastName && touched.lastName }"
+          />
+          <label v-if="errors.lastName && touched.lastName" class="label">
+            <span class="label-text-alt text-error break-words whitespace-normal">{{ errors.lastName }}</span>
+          </label>
+        </div>
+
+        <!-- Phone Number Field -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Phone Number</span>
+          </label>
+          <input
+            v-model="formData.phoneNumber"
+            @blur="markTouched('phoneNumber'); validatePhoneNumber()"
+            @input="validatePhoneNumber"
+            type="tel"
+            placeholder="(203) 555-1234"
+            class="input input-bordered w-full"
+            :class="{ 'input-error': errors.phoneNumber && touched.phoneNumber }"
+          />
+          <label v-if="errors.phoneNumber && touched.phoneNumber" class="label">
+            <span class="label-text-alt text-error break-words whitespace-normal">{{ errors.phoneNumber }}</span>
           </label>
         </div>
 

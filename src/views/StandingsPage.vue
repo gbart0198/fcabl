@@ -107,15 +107,15 @@ onMounted(async () => {
                       {{ standing.team.name }}
                     </span>
                   </td>
-                  <td class="text-center font-semibold text-success text-lg">{{ standing.wins }}</td>
-                  <td class="text-center font-semibold text-error text-lg">{{ standing.losses }}</td>
+                  <td class="text-center font-semibold text-success text-lg">{{ standing.team.wins }}</td>
+                  <td class="text-center font-semibold text-error text-lg">{{ standing.team.losses }}</td>
                   <td class="text-center font-semibold text-fcabl-accent text-lg">
-                    {{ formatWinPercentage(standing.winPercentage) }}
+                    {{ formatWinPercentage(standing.team.winPercentage) }}
                   </td>
-                  <td class="text-center font-semibold text-gray-300">{{ standing.pointsFor }}</td>
-                  <td class="text-center font-semibold text-gray-300">{{ standing.pointsAgainst }}</td>
-                  <td class="text-center font-semibold" :class="getDifferentialClass(standing.pointDifferential)">
-                    {{ getDifferentialPrefix(standing.pointDifferential) }}{{ standing.pointDifferential }}
+                  <td class="text-center font-semibold text-gray-300">{{ standing.team.pointsFor }}</td>
+                  <td class="text-center font-semibold text-gray-300">{{ standing.team.pointsAgainst }}</td>
+                  <td class="text-center font-semibold" :class="getDifferentialClass(standing.team.pointDifferential)">
+                    {{ getDifferentialPrefix(standing.team.pointDifferential) }}{{ standing.team.pointDifferential }}
                   </td>
                   <td class="text-center">
                     <span
@@ -157,16 +157,16 @@ onMounted(async () => {
 
                 <div class="grid grid-cols-3 gap-3 text-center mb-3">
                   <div>
-                    <div class="text-2xl font-bold text-success">{{ standing.wins }}</div>
+                    <div class="text-2xl font-bold text-success">{{ standing.team.wins }}</div>
                     <div class="text-xs text-gray-400">Wins</div>
                   </div>
                   <div>
-                    <div class="text-2xl font-bold text-error">{{ standing.losses }}</div>
+                    <div class="text-2xl font-bold text-error">{{ standing.team.losses }}</div>
                     <div class="text-xs text-gray-400">Losses</div>
                   </div>
                   <div>
                     <div class="text-2xl font-bold text-fcabl-accent">
-                      {{ formatWinPercentage(standing.winPercentage) }}
+                      {{ formatWinPercentage(standing.team.winPercentage) }}
                     </div>
                     <div class="text-xs text-gray-400">Win %</div>
                   </div>
@@ -174,19 +174,19 @@ onMounted(async () => {
 
                 <div class="grid grid-cols-3 gap-3 text-center pt-3 border-t border-gray-700">
                   <div>
-                    <div class="text-lg font-bold text-gray-300">{{ standing.pointsFor }}</div>
+                    <div class="text-lg font-bold text-gray-300">{{ standing.team.pointsFor }}</div>
                     <div class="text-xs text-gray-400">PF</div>
                   </div>
                   <div>
-                    <div class="text-lg font-bold text-gray-300">{{ standing.pointsAgainst }}</div>
+                    <div class="text-lg font-bold text-gray-300">{{ standing.team.pointsAgainst }}</div>
                     <div class="text-xs text-gray-400">PA</div>
                   </div>
                   <div>
                     <div
                       class="text-lg font-bold"
-                      :class="getDifferentialClass(standing.pointDifferential)"
+                      :class="getDifferentialClass(standing.team.pointDifferential)"
                     >
-                      {{ getDifferentialPrefix(standing.pointDifferential) }}{{ standing.pointDifferential }}
+                      {{ getDifferentialPrefix(standing.team.pointDifferential) }}{{ standing.team.pointDifferential }}
                     </div>
                     <div class="text-xs text-gray-400">Diff</div>
                   </div>

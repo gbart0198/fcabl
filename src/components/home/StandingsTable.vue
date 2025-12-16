@@ -60,9 +60,9 @@ const formatWinPercentage = (pct: number): string => {
                   {{ standing.team.name }}
                 </router-link>
               </td>
-              <td class="text-center font-semibold text-success">{{ standing.wins }}</td>
-              <td class="text-center font-semibold text-error">{{ standing.losses }}</td>
-              <td class="text-center font-semibold text-fcabl-accent">{{ formatWinPercentage(standing.winPercentage) }}</td>
+              <td class="text-center font-semibold text-success">{{ standing.team.wins }}</td>
+              <td class="text-center font-semibold text-error">{{ standing.team.losses }}</td>
+              <td class="text-center font-semibold text-fcabl-accent">{{ formatWinPercentage(standing.team.winPercentage) }}</td>
               <td class="text-center">
                 <span
                   class="badge badge-sm"
@@ -107,15 +107,15 @@ const formatWinPercentage = (pct: number): string => {
 
             <div class="grid grid-cols-3 gap-4 text-center">
               <div>
-                <div class="text-2xl font-bold text-success">{{ standing.wins }}</div>
+                <div class="text-2xl font-bold text-success">{{ standing.team.wins }}</div>
                 <div class="text-xs text-gray-400">Wins</div>
               </div>
               <div>
-                <div class="text-2xl font-bold text-error">{{ standing.losses }}</div>
+                <div class="text-2xl font-bold text-error">{{ standing.team.losses }}</div>
                 <div class="text-xs text-gray-400">Losses</div>
               </div>
               <div>
-                <div class="text-2xl font-bold text-fcabl-accent">{{ formatWinPercentage(standing.winPercentage) }}</div>
+                <div class="text-2xl font-bold text-fcabl-accent">{{ formatWinPercentage(standing.team.winPercentage) }}</div>
                 <div class="text-xs text-gray-400">Win %</div>
               </div>
             </div>

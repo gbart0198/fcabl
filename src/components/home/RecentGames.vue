@@ -1,13 +1,9 @@
 <script setup lang="ts">
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { mockRecentGames } from '@/data/mockData';
+import { formatGameDate, formatGameTime } from '@/utils/game';
 
 const games = mockRecentGames;
-
-const formatDate = (dateStr: string): string => {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-};
 </script>
 
 <template>
@@ -35,7 +31,16 @@ const formatDate = (dateStr: string): string => {
           <div class="card-body">
             <!-- Game Status Badge -->
             <div class="flex justify-between items-start mb-4">
-              <div class="badge badge-success badge-sm">FINAL</div>
+              <div 
+                class="badge badge-sm"
+                :class="{
+                  'badge-success': game.status === 'completed',
+                  'badge-info': game.status === 'live',
+                  'badge-ghost': game.status === 'scheduled'
+                }"
+              >
+                {{ game.status.toUpperCase() }}
+              </div>
               <font-awesome-icon :icon="['fas', 'basketball']" class="text-fcabl-accent text-xl" />
             </div>
 
@@ -43,17 +48,17 @@ const formatDate = (dateStr: string): string => {
             <div class="space-y-3">
               <!-- Home Team -->
               <div class="flex justify-between items-center">
-                <span class="text-lg font-semibold text-white">{{ game.homeTeam }}</span>
-                <span class="text-2xl font-bold text-fcabl-accent">{{ game.homeScore }}</span>
+                <span class="text-lg font-semibold text-white">{{ game.homeTeamName }}</span>
+                <span class="text-2xl font-bold text-fcabl-accent">{{ game.homeScore ?? '-' }}</span>
               </div>
 
               <div class="divider my-1"></div>
 
               <!-- Away Team -->
               <div class="flex justify-between items-center">
-                <span class="text-lg font-semibold text-white">{{ game.awayTeam }}</span>
+                <span class="text-lg font-semibold text-white">{{ game.awayTeamName }}</span>
                 <span class="text-2xl font-bold" :class="game.awayScore && game.homeScore && game.awayScore > game.homeScore ? 'text-fcabl-accent' : 'text-gray-400'">
-                  {{ game.awayScore }}
+                  {{ game.awayScore ?? '-' }}
                 </span>
               </div>
             </div>
@@ -62,7 +67,7 @@ const formatDate = (dateStr: string): string => {
             <div class="mt-4 pt-4 border-t border-gray-700">
               <div class="flex items-center text-sm text-gray-400">
                 <font-awesome-icon :icon="['fas', 'calendar']" class="mr-2" />
-                {{ formatDate(game.date) }} at {{ game.time }}
+                {{ formatGameDate(game.gameTime) }} at {{ formatGameTime(game.gameTime) }}
               </div>
             </div>
 

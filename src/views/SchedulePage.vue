@@ -2,39 +2,45 @@
 import { ref, computed, onMounted } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { scheduleService } from '@/services/api';
-import type { Game } from '@/types/game.types';
+import type { GameWithDetails } from '@/types/game.types';
+import { formatGameDate, formatGameTime } from '@/utils/game';
 
-const allGames = ref<Game[]>([]);
+const allGames = ref<GameWithDetails[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
 const expandedGameIds = ref<Set<string>>(new Set());
 
 // Group games by date
 const gamesByDate = computed(() => {
-  const grouped = new Map<string, Game[]>();
+  const grouped = new Map<string, GameWithDetails[]>();
   
   allGames.value.forEach(game => {
-    if (!grouped.has(game.date)) {
-      grouped.set(game.date, []);
+    const dateKey = formatGameDate(game.gameTime);
+    if (!grouped.has(dateKey)) {
+      grouped.set(dateKey, []);
     }
-    grouped.get(game.date)!.push(game);
+    grouped.get(dateKey)!.push(game);
   });
   
   // Sort games within each date by time
   grouped.forEach((games) => {
     games.sort((a, b) => {
-      const timeA = new Date(`${a.date} ${a.time}`).getTime();
-      const timeB = new Date(`${b.date} ${b.time}`).getTime();
-      return timeA - timeB;
+      return new Date(a.gameTime).getTime() - new Date(b.gameTime).getTime();
     });
   });
   
   // Convert to array and sort by date (oldest first)
   return Array.from(grouped.entries())
-    .sort(([dateA], [dateB]) => new Date(dateA).getTime() - new Date(dateB).getTime());
+    .sort(([, gamesA], [, gamesB]) => {
+      const timeA = gamesA[0]?.gameTime ? new Date(gamesA[0].gameTime).getTime() : 0;
+      const timeB = gamesB[0]?.gameTime ? new Date(gamesB[0].gameTime).getTime() : 0;
+      return timeA - timeB;
+    });
 });
 
-const formatDate = (dateString: string): string => {
+const formatDateHeader = (dateString: string): string => {
+  // dateString is already formatted like "Feb 10, 2024"
+  // Parse it and reformat
   const date = new Date(dateString);
   const options: Intl.DateTimeFormatOptions = { 
     weekday: 'long', 
@@ -45,7 +51,7 @@ const formatDate = (dateString: string): string => {
   return date.toLocaleDateString('en-US', options);
 };
 
-const isCompleted = (game: Game): boolean => {
+const isCompleted = (game: GameWithDetails): boolean => {
   return game.status === 'completed';
 };
 
@@ -114,7 +120,7 @@ onMounted(async () => {
           >
             <!-- Date Header -->
             <h2 class="text-2xl font-bold text-white mb-4 pb-3 border-b border-gray-700">
-              {{ formatDate(date) }}
+              {{ formatDateHeader(date) }}
             </h2>
 
             <!-- Games for this date -->
@@ -133,7 +139,7 @@ onMounted(async () => {
                   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <!-- Time -->
                     <div class="text-sm font-semibold text-gray-400 sm:w-24">
-                      {{ game.time }}
+                      {{ formatGameTime(game.gameTime) }}
                     </div>
 
                     <!-- Teams & Score -->
@@ -141,7 +147,7 @@ onMounted(async () => {
                       <div class="flex items-center justify-center gap-3">
                         <!-- Away Team -->
                         <span class="text-white font-semibold text-right flex-1">
-                          {{ game.awayTeam }}
+                          {{ game.awayTeamName }}
                         </span>
 
                         <!-- Score or @ symbol -->
@@ -160,7 +166,7 @@ onMounted(async () => {
 
                         <!-- Home Team -->
                         <span class="text-white font-semibold text-left flex-1">
-                          {{ game.homeTeam }}
+                          {{ game.homeTeamName }}
                         </span>
                       </div>
 
@@ -201,7 +207,7 @@ onMounted(async () => {
                     <div class="grid grid-cols-2 gap-4">
                       <!-- Away Team Halves -->
                       <div class="text-center">
-                        <div class="text-xs text-gray-400 mb-1">{{ game.awayTeam }}</div>
+                        <div class="text-xs text-gray-400 mb-1">{{ game.awayTeamName }}</div>
                         <div class="flex justify-center gap-4 text-sm">
                           <span class="text-white">
                             <span class="text-gray-500">1st:</span> {{ game.details.awayFirstHalf }}
@@ -213,7 +219,7 @@ onMounted(async () => {
                       </div>
                       <!-- Home Team Halves -->
                       <div class="text-center">
-                        <div class="text-xs text-gray-400 mb-1">{{ game.homeTeam }}</div>
+                        <div class="text-xs text-gray-400 mb-1">{{ game.homeTeamName }}</div>
                         <div class="flex justify-center gap-4 text-sm">
                           <span class="text-white">
                             <span class="text-gray-500">1st:</span> {{ game.details.homeFirstHalf }}
@@ -230,7 +236,7 @@ onMounted(async () => {
                   <div class="grid md:grid-cols-2 gap-4">
                     <!-- Away Team Players -->
                     <div>
-                      <h4 class="text-sm font-semibold text-gray-400 mb-2 uppercase">{{ game.awayTeam }} - Players</h4>
+                      <h4 class="text-sm font-semibold text-gray-400 mb-2 uppercase">{{ game.awayTeamName }} - Players</h4>
                       <div class="space-y-1">
                         <div 
                           v-for="player in game.details.awayPlayerStats"
@@ -248,7 +254,7 @@ onMounted(async () => {
 
                     <!-- Home Team Players -->
                     <div>
-                      <h4 class="text-sm font-semibold text-gray-400 mb-2 uppercase">{{ game.homeTeam }} - Players</h4>
+                      <h4 class="text-sm font-semibold text-gray-400 mb-2 uppercase">{{ game.homeTeamName }} - Players</h4>
                       <div class="space-y-1">
                         <div 
                           v-for="player in game.details.homePlayerStats"

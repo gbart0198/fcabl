@@ -2,11 +2,12 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { scheduleService, adminService, teamService } from '@/services/api';
-import type { Game, Player, TeamDetail } from '@/types/game.types';
+import type { GameWithDetails, PlayerProfile, TeamDetail } from '@/types/game.types';
 import type { GameResultData, PlayerGameResult } from '@/types/admin.types';
+import { formatGameDate, formatGameTime } from '@/utils/game';
 
 // State
-const games = ref<Game[]>([]);
+const games = ref<GameWithDetails[]>([]);
 const teams = ref<{ [key: string]: TeamDetail }>({});
 const loading = ref(false);
 const saving = ref(false);
@@ -18,7 +19,7 @@ const filterStatus = ref<'all' | 'completed' | 'recent'>('all');
 
 // Modal state
 const showModal = ref(false);
-const editingGame = ref<Game | null>(null);
+const editingGame = ref<GameWithDetails | null>(null);
 const isEditingCompleted = ref(false);
 
 // Form state
@@ -41,16 +42,6 @@ const filteredGames = computed(() => {
     return games.value.slice(-10).reverse();
   }
   return games.value;
-});
-
-const homeTeamRoster = computed(() => {
-  if (!editingGame.value) return [];
-  return teams.value[editingGame.value.homeTeamId]?.roster || [];
-});
-
-const awayTeamRoster = computed(() => {
-  if (!editingGame.value) return [];
-  return teams.value[editingGame.value.awayTeamId]?.roster || [];
 });
 
 const homePlayerTotal = computed(() => {
@@ -105,7 +96,7 @@ async function loadData() {
     ]);
     
     games.value = gamesData.sort((a, b) => 
-      new Date(b.date).getTime() - new Date(a.date).getTime()
+      new Date(b.gameTime).getTime() - new Date(a.gameTime).getTime()
     );
     
     // Load full team details
@@ -127,7 +118,7 @@ async function loadData() {
   }
 }
 
-function openModal(game: Game) {
+function openModal(game: GameWithDetails) {
   editingGame.value = game;
   isEditingCompleted.value = game.status === 'completed';
   
@@ -135,10 +126,10 @@ function openModal(game: Game) {
   formData.value = {
     homeScore: game.homeScore || 0,
     awayScore: game.awayScore || 0,
-    homeFirstHalf: game.details?.homeFirstHalf || 0,
-    homeSecondHalf: game.details?.homeSecondHalf || 0,
-    awayFirstHalf: game.details?.awayFirstHalf || 0,
-    awaySecondHalf: game.details?.awaySecondHalf || 0,
+    homeFirstHalf: 0,
+    homeSecondHalf: 0,
+    awayFirstHalf: 0,
+    awaySecondHalf: 0,
     homePlayerStats: [],
     awayPlayerStats: [],
   };
@@ -147,18 +138,18 @@ function openModal(game: Game) {
   const homeRoster = teams.value[game.homeTeamId]?.roster || [];
   const awayRoster = teams.value[game.awayTeamId]?.roster || [];
   
-  formData.value.homePlayerStats = homeRoster.map(player => ({
+  formData.value.homePlayerStats = homeRoster.map((player: PlayerProfile) => ({
     playerId: player.id,
-    playerName: player.name,
-    number: player.number,
-    points: game.details?.homePlayerStats.find(p => p.playerId === player.id)?.points || 0,
+    playerName: player.fullName,
+    number: player.jerseyNumber || 0,
+    points: 0,
   }));
   
-  formData.value.awayPlayerStats = awayRoster.map(player => ({
+  formData.value.awayPlayerStats = awayRoster.map((player: PlayerProfile) => ({
     playerId: player.id,
-    playerName: player.name,
-    number: player.number,
-    points: game.details?.awayPlayerStats.find(p => p.playerId === player.id)?.points || 0,
+    playerName: player.fullName,
+    number: player.jerseyNumber || 0,
+    points: 0,
   }));
   
   showModal.value = true;
@@ -210,16 +201,6 @@ async function submitResult() {
   } finally {
     saving.value = false;
   }
-}
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', { 
-    weekday: 'short', 
-    month: 'short', 
-    day: 'numeric', 
-    year: 'numeric' 
-  });
 }
 
 onMounted(() => {
@@ -295,11 +276,11 @@ onMounted(() => {
                 <span class="badge badge-sm" :class="game.status === 'completed' ? 'badge-success' : 'badge-outline'">
                   {{ game.status === 'completed' ? 'Completed' : 'Scheduled' }}
                 </span>
-                <span class="text-gray-400 text-sm">{{ formatDate(game.date) }} at {{ game.time }}</span>
+                <span class="text-gray-400 text-sm">{{ formatGameDate(game.gameTime) }} at {{ formatGameTime(game.gameTime) }}</span>
               </div>
               
               <div class="flex items-center justify-between gap-3">
-                <span class="text-white font-semibold">{{ game.homeTeam }}</span>
+                <span class="text-white font-semibold">{{ game.homeTeamName }}</span>
                 <div class="text-center">
                   <template v-if="game.status === 'completed' && game.homeScore !== undefined">
                     <span class="text-2xl font-bold text-fcabl-accent">
@@ -310,7 +291,7 @@ onMounted(() => {
                     <span class="text-gray-500">vs</span>
                   </template>
                 </div>
-                <span class="text-white font-semibold">{{ game.awayTeam }}</span>
+                <span class="text-white font-semibold">{{ game.awayTeamName }}</span>
               </div>
             </div>
 
@@ -363,10 +344,10 @@ onMounted(() => {
         <div v-if="editingGame" class="bg-fcabl-dark p-4 rounded-lg mb-6">
           <div class="text-center">
             <div class="text-gray-400 text-sm mb-2">
-              {{ formatDate(editingGame.date) }} at {{ editingGame.time }}
+              {{ formatGameDate(editingGame.gameTime) }} at {{ formatGameTime(editingGame.gameTime) }}
             </div>
             <div class="text-2xl font-bold text-white">
-              {{ editingGame.homeTeam }} <span class="text-fcabl-accent">vs</span> {{ editingGame.awayTeam }}
+              {{ editingGame.homeTeamName }} <span class="text-fcabl-accent">vs</span> {{ editingGame.awayTeamName }}
             </div>
           </div>
         </div>
@@ -379,7 +360,7 @@ onMounted(() => {
             <div class="grid grid-cols-3 gap-4 items-center max-w-2xl mx-auto">
               <!-- Home Team -->
               <div class="text-center">
-                <div class="text-gray-400 text-sm mb-2">{{ editingGame?.homeTeam }}</div>
+                <div class="text-gray-400 text-sm mb-2">{{ editingGame?.homeTeamName }}</div>
                 <div class="text-5xl font-bold text-white bg-fcabl-dark-light rounded-lg py-6">
                   {{ homeHalfTotal }}
                 </div>
@@ -392,7 +373,7 @@ onMounted(() => {
               
               <!-- Away Team -->
               <div class="text-center">
-                <div class="text-gray-400 text-sm mb-2">{{ editingGame?.awayTeam }}</div>
+                <div class="text-gray-400 text-sm mb-2">{{ editingGame?.awayTeamName }}</div>
                 <div class="text-5xl font-bold text-white bg-fcabl-dark-light rounded-lg py-6">
                   {{ awayHalfTotal }}
                 </div>
@@ -408,7 +389,7 @@ onMounted(() => {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <!-- Home Team Halves -->
               <div class="space-y-2">
-                <div class="text-sm font-semibold text-gray-400">{{ editingGame?.homeTeam }}</div>
+                <div class="text-sm font-semibold text-gray-400">{{ editingGame?.homeTeamName }}</div>
                 <div class="grid grid-cols-2 gap-2">
                   <div>
                     <label class="label">
@@ -437,7 +418,7 @@ onMounted(() => {
 
               <!-- Away Team Halves -->
               <div class="space-y-2">
-                <div class="text-sm font-semibold text-gray-400">{{ editingGame?.awayTeam }}</div>
+                <div class="text-sm font-semibold text-gray-400">{{ editingGame?.awayTeamName }}</div>
                 <div class="grid grid-cols-2 gap-2">
                   <div>
                     <label class="label">
@@ -473,7 +454,7 @@ onMounted(() => {
               <!-- Home Team Players -->
               <div>
                 <div class="text-sm font-semibold text-gray-400 mb-2 flex items-center justify-between">
-                  <span>{{ editingGame?.homeTeam }}</span>
+                  <span>{{ editingGame?.homeTeamName }}</span>
                   <span :class="homePlayerTotal === homeHalfTotal ? 'text-success' : 'text-error'">
                     {{ homePlayerTotal }} / {{ homeHalfTotal }}
                   </span>
@@ -500,7 +481,7 @@ onMounted(() => {
               <!-- Away Team Players -->
               <div>
                 <div class="text-sm font-semibold text-gray-400 mb-2 flex items-center justify-between">
-                  <span>{{ editingGame?.awayTeam }}</span>
+                  <span>{{ editingGame?.awayTeamName }}</span>
                   <span :class="awayPlayerTotal === awayHalfTotal ? 'text-success' : 'text-error'">
                     {{ awayPlayerTotal }} / {{ awayHalfTotal }}
                   </span>
