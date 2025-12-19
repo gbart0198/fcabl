@@ -13,94 +13,137 @@
  */
 export interface Team {
   /** Unique identifier for the team */
-  id: string;                    // json:"id"
-  
+  id: number; // json:"id"
+
   /** Team name */
-  name: string;                  // json:"name"
-  
+  name: string; // json:"name"
+
   /** Number of wins */
-  wins: number;                  // json:"wins"
-  
+  wins: number; // json:"wins"
+
   /** Number of losses */
-  losses: number;                // json:"losses"
-  
+  losses: number; // json:"losses"
+
   /** Number of draws */
-  draws: number;                 // json:"draws"
-  
+  draws: number; // json:"draws"
+
   /** Total points scored by team */
-  pointsFor: number;             // json:"pointsFor"
-  
+  pointsFor: number; // json:"pointsFor"
+
   /** Total points allowed by team */
-  pointsAgainst: number;         // json:"pointsAgainst"
-  
+  pointsAgainst: number; // json:"pointsAgainst"
+
   /** Timestamp when team was created (ISO 8601 format: "2024-02-10T16:00:00") */
-  createdAt: string;             // json:"createdAt"
-  
+  createdAt: string; // json:"createdAt"
+
   /** Timestamp when team was last updated (ISO 8601 format: "2024-02-10T16:00:00") */
-  updatedAt: string;             // json:"updatedAt"
+  updatedAt: string; // json:"updatedAt"
+}
+
+/**
+ * Basketball team with player details.
+ * Maps to: backend/internal/repository/models.go TeamWithPlayers struct
+ */
+export interface TeamWithPlayers {
+  /** Unique identifier for the team */
+  id: number; // json:"id"
+
+  /** Team name */
+  name: string; // json:"name"
+
+  /** Number of wins */
+  wins: number; // json:"wins"
+
+  /** Number of losses */
+  losses: number; // json:"losses"
+
+  /** Number of draws */
+  draws: number; // json:"draws"
+
+  /** Total points scored by team */
+  pointsFor: number; // json:"pointsFor"
+
+  /** Total points allowed by team */
+  pointsAgainst: number; // json:"pointsAgainst"
+
+  /** Timestamp when team was created (ISO 8601 format: "2024-02-10T16:00:00") */
+  createdAt: string; // json:"createdAt"
+
+  /** Timestamp when team was last updated (ISO 8601 format: "2024-02-10T16:00:00") */
+  updatedAt: string; // json:"updatedAt"
+
+  players: SimplePlayerDetails[];
+}
+
+export interface SimplePlayerDetails {
+  jerseyNumber: number;
+
+  firstName: string;
+
+  lastName: string;
 }
 
 /**
  * Player registration and team assignment
  * Matches backend Player model exactly (1:1 mapping with JSON tags)
  * Maps to: backend/internal/repository/models.go Player struct
- * 
+ *
  * NOTE: This is the base player record. For display with user info, use PlayerProfile
  */
 export interface Player {
   /** Unique identifier for the player */
-  id: string;                    // json:"id"
-  
+  id: string; // json:"id"
+
   /** ID of the user account (links to User.id) */
-  userId: string;                // json:"userId"
-  
+  userId: string; // json:"userId"
+
   /** ID of the team (null if unassigned) */
-  teamId: string | null;         // json:"teamId" - nullable
-  
+  teamId: string | null; // json:"teamId" - nullable
+
   /** Registration fee amount due (null if paid in full) */
   registrationFeeDue: number | null; // json:"registrationFeeDue" - decimal
-  
+
   /** Whether player has completed full registration */
-  isFullyRegistered: boolean;    // json:"isFullyRegistered"
-  
+  isFullyRegistered: boolean; // json:"isFullyRegistered"
+
   /** Whether player is active in the league */
-  isActive: boolean;             // json:"isActive"
-  
+  isActive: boolean; // json:"isActive"
+
   /** Player's jersey number (null if not assigned) */
-  jerseyNumber: number | null;   // json:"jerseyNumber" - nullable
-  
+  jerseyNumber: number | null; // json:"jerseyNumber" - nullable
+
   /** Timestamp when player was created (ISO 8601 format: "2024-02-10T16:00:00") */
-  createdAt: string;             // json:"createdAt"
-  
+  createdAt: string; // json:"createdAt"
+
   /** Timestamp when player was last updated (ISO 8601 format: "2024-02-10T16:00:00") */
-  updatedAt: string;             // json:"updatedAt"
+  updatedAt: string; // json:"updatedAt"
 }
 
 /**
  * Scheduled game
  * Matches backend Game model exactly (1:1 mapping with JSON tags)
  * Maps to: backend/internal/repository/models.go Game struct
- * 
+ *
  * NOTE: This only contains schedule info. For scores, see GameResult type
  */
 export interface Game {
   /** Unique identifier for the game */
-  id: string;                    // json:"id"
-  
+  id: string; // json:"id"
+
   /** Home team ID */
-  homeTeamId: string;            // json:"homeTeamId"
-  
+  homeTeamId: string; // json:"homeTeamId"
+
   /** Away team ID */
-  awayTeamId: string;            // json:"awayTeamId"
-  
+  awayTeamId: string; // json:"awayTeamId"
+
   /** Scheduled game time (ISO 8601 format: "2024-02-10T16:00:00") */
-  gameTime: string;              // json:"gameTime"
-  
+  gameTime: string; // json:"gameTime"
+
   /** Timestamp when game was created (ISO 8601 format: "2024-02-10T16:00:00") */
-  createdAt: string;             // json:"createdAt"
-  
+  createdAt: string; // json:"createdAt"
+
   /** Timestamp when game was last updated (ISO 8601 format: "2024-02-10T16:00:00") */
-  updatedAt: string;             // json:"updatedAt"
+  updatedAt: string; // json:"updatedAt"
 }
 
 // ==================
@@ -115,19 +158,19 @@ export interface Game {
 export interface PlayerProfile extends Player {
   /** User's email address (from User.email) */
   email: string;
-  
+
   /** User's phone number (from User.phoneNumber) */
   phoneNumber: string;
-  
+
   /** User's first name (from User.firstName) */
   firstName: string;
-  
+
   /** User's last name (from User.lastName) */
   lastName: string;
-  
+
   /** User's role (from User.role) */
   role: string;
-  
+
   /** Computed full name (firstName + lastName) */
   fullName: string;
 }
@@ -139,16 +182,16 @@ export interface PlayerProfile extends Player {
 export interface TeamWithStats extends Team {
   /** Win percentage (0-1), computed: wins / (wins + losses + draws) */
   winPercentage: number;
-  
+
   /** Point differential, computed: pointsFor - pointsAgainst */
   pointDifferential: number;
-  
+
   /** Total games played, computed: wins + losses + draws */
   gamesPlayed: number;
-  
+
   /** Average points scored per game, computed: pointsFor / gamesPlayed */
   avgPointsFor: number;
-  
+
   /** Average points allowed per game, computed: pointsAgainst / gamesPlayed */
   avgPointsAgainst: number;
 }
@@ -160,19 +203,19 @@ export interface TeamWithStats extends Team {
 export interface GameWithDetails extends Game {
   /** Home team name (from Team.name) */
   homeTeamName: string;
-  
+
   /** Away team name (from Team.name) */
   awayTeamName: string;
-  
+
   /** Home team final score (from GameResult.homeScore if exists) */
   homeScore?: number;
-  
+
   /** Away team final score (from GameResult.awayScore if exists) */
   awayScore?: number;
-  
+
   /** Game status: scheduled, live, or completed (computed) */
-  status: 'scheduled' | 'live' | 'completed';
-  
+  status: "scheduled" | "live" | "completed";
+
   /** Detailed game statistics (only for completed games) */
   details?: GameDetails;
 }

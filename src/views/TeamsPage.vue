@@ -3,17 +3,16 @@ import { ref, computed, watch, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { teamService } from "@/services/api";
-import type { Team, TeamDetail } from "@/types/game.types";
+import type { Team, TeamWithPlayers } from "@/types/game.types";
 import TeamStats from "@/components/teams/TeamStats.vue";
 import TeamRoster from "@/components/teams/TeamRoster.vue";
 import TeamSchedule from "@/components/teams/TeamSchedule.vue";
 
 const route = useRoute();
-const router = useRouter();
 
-const allTeams = ref<Team[]>([]);
-const selectedTeam = ref<Team | null>(null);
-const selectedTeamId = ref<string>("");
+const allTeams = ref<TeamWithPlayers[]>([]);
+const selectedTeam = ref<TeamWithPlayers | null>(null);
+const selectedTeamId = ref<number>();
 const loading = ref(false);
 const error = ref<string | null>(null);
 
@@ -22,59 +21,39 @@ const sortedTeams = computed(() => {
     return [...allTeams.value].sort((a, b) => a.name.localeCompare(b.name));
 });
 
-const formatRecord = (team: TeamDetail): string => {
+const formatRecord = (team: Team): string => {
     return `${team.wins}-${team.losses}`;
 };
 
+const calculateWinPercentage = (team: Team): number => {
+    return (team.wins / (team.wins + team.losses)) * 100;
+};
+
 const formatWinPercentage = (pct: number): string => {
-    return (pct * 100).toFixed(1) + "%";
+    return pct.toFixed(1) + "%";
 };
 
-const selectTeam = async (teamId: string) => {
-    if (!teamId) return;
-
-    try {
-        loading.value = true;
+const loadTeamDetails = async (teamId: number | string | undefined) => {
+    if (teamId) {
         error.value = null;
-
-        // Update URL with query parameter (doesn't reload the page)
-        router.push({ path: "/teams", query: { team_id: teamId } });
-
-        // Fetch team details
-        const team = await teamService.getTeam({ id: teamId });
-        if (team) {
-            selectedTeam.value = team;
-            selectedTeamId.value = teamId;
-        } else {
-            error.value = "Team not found";
+        if (typeof teamId === "string") {
+            try {
+                teamId = parseInt(teamId);
+            } catch (err) {
+                console.error(`Failed to parse teamId: ${teamId}`);
+                teamId = -1;
+            }
         }
-    } catch (err) {
-        error.value = "Failed to load team details";
-        console.error("Error loading team:", err);
-    } finally {
-        loading.value = false;
-    }
-};
 
-const loadTeamDetails = async (teamId: string) => {
-    try {
-        loading.value = true;
-        error.value = null;
-
-        const team = await teamService.getTeam({ id: teamId });
+        const team = allTeams.value.find((t) => t.id === teamId);
         if (team) {
             selectedTeam.value = team;
             selectedTeamId.value = teamId;
         } else {
             error.value = "Team not found";
             selectedTeam.value = null;
-            selectedTeamId.value = "";
+            selectedTeamId.value = 0;
         }
-    } catch (err) {
-        error.value = "Failed to load team details";
-        console.error("Error loading team:", err);
-    } finally {
-        loading.value = false;
     }
 };
 
@@ -87,7 +66,7 @@ watch(
         } else {
             // No team selected - clear selection
             selectedTeam.value = null;
-            selectedTeamId.value = "";
+            selectedTeamId.value = 0;
         }
     },
     { immediate: false },
@@ -96,7 +75,7 @@ watch(
 onMounted(async () => {
     try {
         // Load all teams for dropdown
-        allTeams.value = await teamService.listTeams();
+        allTeams.value = await teamService.listTeamsWithPlayers();
 
         // If team_id is in query params, load that team
         const teamId = route.query.team_id;
@@ -138,7 +117,7 @@ onMounted(async () => {
                         </label>
                         <select
                             v-model="selectedTeamId"
-                            @change="selectTeam(selectedTeamId)"
+                            @change="loadTeamDetails(selectedTeamId)"
                             class="select select-bordered select-lg bg-fcabl-dark text-white border-gray-600 focus:border-fcabl-accent focus:outline-none pl-6"
                         >
                             <option value="" disabled class="text-center">
@@ -194,7 +173,7 @@ onMounted(async () => {
                             <span class="text-fcabl-accent ml-2"
                                 >({{
                                     formatWinPercentage(
-                                        selectedTeam.winPercentage,
+                                        calculateWinPercentage(selectedTeam),
                                     )
                                 }})</span
                             >
@@ -205,13 +184,10 @@ onMounted(async () => {
                     <TeamStats :team="selectedTeam" />
 
                     <!-- Team Roster -->
-                    <TeamRoster :roster="selectedTeam.roster" />
+                    <TeamRoster :roster="selectedTeam.players" />
 
                     <!-- Team Schedule -->
-                    <TeamSchedule
-                        :games="selectedTeam.games"
-                        :team-id="selectedTeam.id"
-                    />
+                    <!-- <TeamSchedule :games="selectedTeam.games" :team-id="selectedTeam.id" /> -->
                 </div>
 
                 <!-- No Team Selected -->

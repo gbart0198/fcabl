@@ -3,8 +3,13 @@
  * Handles all team-related API calls
  */
 
-import { apiClient } from './apiClient';
-import type { Team, TeamWithStats, Standing } from '@/types/game.types';
+import { apiClient } from "./apiClient";
+import type {
+  Team,
+  TeamWithStats,
+  Standing,
+  TeamWithPlayers,
+} from "@/types/game.types";
 
 /**
  * Parameters for getting a team
@@ -43,7 +48,11 @@ export const teamService = {
    * @returns Promise resolving to array of teams
    */
   async listTeams(): Promise<Team[]> {
-    return apiClient.get<Team[]>('/api/team/list');
+    return apiClient.get<Team[]>("/api/team/list");
+  },
+
+  async listTeamsWithPlayers(): Promise<TeamWithPlayers[]> {
+    return apiClient.get<TeamWithPlayers[]>("/api/team/players/list");
   },
 
   /**
@@ -51,7 +60,7 @@ export const teamService = {
    * @returns Promise resolving to array of standings
    */
   async getTeamStandings(): Promise<Standing[]> {
-    return apiClient.get<Standing[]>('/api/team/standings');
+    return apiClient.get<Standing[]>("/api/team/standings");
   },
 
   /**
@@ -60,7 +69,7 @@ export const teamService = {
    * @returns Promise resolving to team with stats
    */
   async getTeamStats(params: GetTeamParams): Promise<TeamWithStats> {
-    return apiClient.get<TeamWithStats>('/api/team/stats', params);
+    return apiClient.get<TeamWithStats>("/api/team/stats", params);
   },
 
   /**
@@ -69,7 +78,7 @@ export const teamService = {
    * @returns Promise resolving to team with player roster
    */
   async getTeamWithPlayers(params: GetTeamParams): Promise<Team> {
-    return apiClient.get<Team>('/api/team/players', params);
+    return apiClient.get<Team>("/api/team/players", params);
   },
 
   /**
@@ -78,7 +87,7 @@ export const teamService = {
    * @returns Promise resolving to team
    */
   async getTeam(params: GetTeamParams): Promise<Team> {
-    return apiClient.get<Team>('/api/team', params);
+    return apiClient.get<Team>("/api/team", params);
   },
 
   /**
@@ -87,7 +96,7 @@ export const teamService = {
    * @returns Promise resolving to created team
    */
   async createTeam(data: CreateTeamData): Promise<Team> {
-    return apiClient.post<Team>('/api/team', data);
+    return apiClient.post<Team>("/api/team", data);
   },
 
   /**
@@ -96,7 +105,7 @@ export const teamService = {
    * @returns Promise resolving to updated team
    */
   async updateTeam(data: UpdateTeamData): Promise<Team> {
-    return apiClient.put<Team>('/api/team', data);
+    return apiClient.put<Team>("/api/team", data);
   },
 
   /**

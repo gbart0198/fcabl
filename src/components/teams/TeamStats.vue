@@ -1,21 +1,29 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import type { TeamDetail } from '@/types/game.types';
+import type { Team } from '@/types/game.types';
 
 interface Props {
-  team: TeamDetail;
+  team: Team;
 }
 
 const props = defineProps<Props>();
 
 const formatPercentage = (value: number): string => {
-  return (value * 100).toFixed(1) + '%';
+  return (value).toFixed(1) + '%';
 };
 
 const formatAverage = (value: number): string => {
   return value.toFixed(1);
 };
+
+const calculateAverage = (team: Team, points: number): number => {
+  return points / (team.wins + team.losses + team.draws);
+}
+
+const calculateWinPercentage = (team: Team): number => {
+  return (team.wins / (team.wins + team.losses)) * 100;
+}
 
 const differentialClass = computed(() => {
   if (props.team.pointsFor - props.team.pointsAgainst > 0) {
@@ -38,34 +46,35 @@ const differentialPrefix = computed(() => {
       <font-awesome-icon :icon="['fas', 'chart-bar']" class="text-fcabl-accent" />
       Team Statistics
     </h3>
-    
+
     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
       <!-- Record -->
       <div class="text-center">
         <div class="text-3xl font-bold text-white">{{ team.wins }}-{{ team.losses }}</div>
         <div class="text-sm text-gray-400">Record</div>
       </div>
-      
+
       <!-- Win Percentage -->
       <div class="text-center">
-        <div class="text-3xl font-bold text-fcabl-accent">{{ formatPercentage(team.winPercentage) }}</div>
+        <div class="text-3xl font-bold text-fcabl-accent">{{ formatPercentage(calculateWinPercentage(team)) }}</div>
         <div class="text-sm text-gray-400">Win %</div>
       </div>
-      
+
       <!-- Points For -->
       <div class="text-center">
         <div class="text-3xl font-bold text-success">{{ team.pointsFor }}</div>
         <div class="text-sm text-gray-400">Points For</div>
-        <div class="text-xs text-gray-500 mt-1">{{ formatAverage(team.avgPointsFor) }} avg</div>
+        <div class="text-xs text-gray-500 mt-1">{{ formatAverage(calculateAverage(team, team.pointsFor)) }} avg</div>
       </div>
-      
+
       <!-- Points Against -->
       <div class="text-center">
         <div class="text-3xl font-bold text-error">{{ team.pointsAgainst }}</div>
         <div class="text-sm text-gray-400">Points Against</div>
-        <div class="text-xs text-gray-500 mt-1">{{ formatAverage(team.avgPointsAgainst) }} avg</div>
+        <div class="text-xs text-gray-500 mt-1">{{ formatAverage(calculateAverage(team, team.pointsAgainst)) }} avg
+        </div>
       </div>
-      
+
       <!-- Point Differential -->
       <div class="text-center">
         <div class="text-3xl font-bold" :class="differentialClass">
