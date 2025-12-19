@@ -12,195 +12,170 @@ const route = useRoute();
 
 const allTeams = ref<TeamWithPlayers[]>([]);
 const selectedTeam = ref<TeamWithPlayers | null>(null);
-const selectedTeamId = ref<number>();
+const selectedTeamId = ref<number>(0);
 const loading = ref(false);
 const error = ref<string | null>(null);
 
 // Sort teams alphabetically by name
 const sortedTeams = computed(() => {
-    return [...allTeams.value].sort((a, b) => a.name.localeCompare(b.name));
+  return [...allTeams.value].sort((a, b) => a.name.localeCompare(b.name));
 });
 
 const formatRecord = (team: Team): string => {
-    return `${team.wins}-${team.losses}`;
+  return `${team.wins}-${team.losses}`;
 };
 
 const calculateWinPercentage = (team: Team): number => {
-    return (team.wins / (team.wins + team.losses)) * 100;
+  return (team.wins / (team.wins + team.losses)) * 100;
 };
 
 const formatWinPercentage = (pct: number): string => {
-    return pct.toFixed(1) + "%";
+  return pct.toFixed(1) + "%";
 };
 
 const loadTeamDetails = async (teamId: number | string | undefined) => {
-    if (teamId) {
-        error.value = null;
-        if (typeof teamId === "string") {
-            try {
-                teamId = parseInt(teamId);
-            } catch (err) {
-                console.error(`Failed to parse teamId: ${teamId}`);
-                teamId = -1;
-            }
-        }
-
-        const team = allTeams.value.find((t) => t.id === teamId);
-        if (team) {
-            selectedTeam.value = team;
-            selectedTeamId.value = teamId;
-        } else {
-            error.value = "Team not found";
-            selectedTeam.value = null;
-            selectedTeamId.value = 0;
-        }
+  if (teamId) {
+    error.value = null;
+    if (typeof teamId === "string") {
+      try {
+        teamId = parseInt(teamId);
+      } catch (err) {
+        console.error(`Failed to parse teamId: ${teamId}`);
+        teamId = -1;
+      }
     }
+
+    const team = allTeams.value.find((t) => t.id === teamId);
+    if (team) {
+      selectedTeam.value = team;
+      selectedTeamId.value = teamId;
+    } else {
+      error.value = "Team not found";
+      selectedTeam.value = null;
+      selectedTeamId.value = 0;
+    }
+  }
 };
 
 // Watch query parameter changes
 watch(
-    () => route.query.team_id,
-    (newTeamId) => {
-        if (newTeamId && typeof newTeamId === "string") {
-            loadTeamDetails(newTeamId);
-        } else {
-            // No team selected - clear selection
-            selectedTeam.value = null;
-            selectedTeamId.value = 0;
-        }
-    },
-    { immediate: false },
+  () => route.query.team_id,
+  (newTeamId) => {
+    if (newTeamId && typeof newTeamId === "string") {
+      loadTeamDetails(newTeamId);
+    } else {
+      // No team selected - clear selection
+      selectedTeam.value = null;
+      selectedTeamId.value = 0;
+    }
+  },
+  { immediate: false },
 );
 
 onMounted(async () => {
-    try {
-        // Load all teams for dropdown
-        allTeams.value = await teamService.listTeamsWithPlayers();
+  try {
+    // Load all teams for dropdown
+    allTeams.value = await teamService.listTeamsWithPlayers();
 
-        // If team_id is in query params, load that team
-        const teamId = route.query.team_id;
-        if (teamId && typeof teamId === "string") {
-            await loadTeamDetails(teamId);
-        }
-    } catch (err) {
-        error.value = "Failed to load teams";
-        console.error("Error loading teams:", err);
+    // If team_id is in query params, load that team
+    const teamId = route.query.team_id;
+    if (teamId && typeof teamId === "string") {
+      await loadTeamDetails(teamId);
     }
+  } catch (err) {
+    error.value = "Failed to load teams";
+    console.error("Error loading teams:", err);
+  }
 });
 </script>
 
 <template>
-    <div class="min-h-screen bg-fcabl-dark">
-        <!-- Header Section -->
-        <section class="py-16 bg-fcabl-dark-light">
-            <div class="container mx-auto px-4">
-                <div class="text-center mb-8">
-                    <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
-                        <font-awesome-icon
-                            :icon="['fas', 'basketball']"
-                            class="text-fcabl-accent mr-3"
-                        />
-                        Teams
-                    </h1>
-                    <p class="text-gray-400 text-lg">
-                        View team rosters, schedules, and statistics
-                    </p>
-                </div>
+  <div class="min-h-screen bg-fcabl-dark">
+    <!-- Header Section -->
+    <section class="py-16 bg-fcabl-dark-light">
+      <div class="container mx-auto px-4">
+        <div class="text-center mb-8">
+          <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+            <font-awesome-icon :icon="['fas', 'basketball']" class="text-fcabl-accent mr-3" />
+            Teams
+          </h1>
+          <p class="text-gray-400 text-lg">
+            View team rosters, schedules, and statistics
+          </p>
+        </div>
 
-                <!-- Team Dropdown Selector -->
-                <div v-if="sortedTeams.length > 0" class="flex justify-center">
-                    <div class="form-control w-full max-w-xs">
-                        <label class="label">
-                            <span class="label-text text-gray-400"
-                                >Select a team</span
-                            >
-                        </label>
-                        <select
-                            v-model="selectedTeamId"
-                            @change="loadTeamDetails(selectedTeamId)"
-                            class="select select-bordered select-lg bg-fcabl-dark text-white border-gray-600 focus:border-fcabl-accent focus:outline-none pl-6"
-                        >
-                            <option value="" disabled class="text-center">
-                                Choose a team...
-                            </option>
-                            <option
-                                v-for="team in sortedTeams"
-                                :key="team.id"
-                                :value="team.id"
-                                class="text-center"
-                            >
-                                {{ team.name }} ({{ team.wins }}-{{
-                                    team.losses
-                                }})
-                            </option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-        </section>
+        <!-- Team Dropdown Selector -->
+        <div v-if="sortedTeams.length > 0" class="flex justify-center">
+          <div class="form-control w-full max-w-xs">
+            <label class="label">
+              <span class="label-text text-gray-400">Select a team</span>
+            </label>
+            <select v-model="selectedTeamId" @change="loadTeamDetails(selectedTeamId)"
+              class="select select-bordered select-lg bg-fcabl-dark text-white border-gray-600 focus:border-fcabl-accent focus:outline-none pl-6">
+              <option value=0 disabled class="text-center">
+                Choose a team...
+              </option>
+              <option v-for="team in sortedTeams" :key="team.id" :value="team.id" class="text-center">
+                {{ team.name }} ({{ team.wins }}-{{
+                  team.losses
+                }})
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        <!-- Team Content Section -->
-        <section class="py-12">
-            <div class="container mx-auto px-4">
-                <!-- Loading State -->
-                <div v-if="loading" class="text-center py-12">
-                    <span
-                        class="loading loading-spinner loading-lg text-fcabl-accent"
-                    ></span>
-                    <p class="text-gray-400 mt-4">Loading team details...</p>
-                </div>
+    <!-- Team Content Section -->
+    <section class="py-12">
+      <div class="container mx-auto px-4">
+        <!-- Loading State -->
+        <div v-if="loading" class="text-center py-12">
+          <span class="loading loading-spinner loading-lg text-fcabl-accent"></span>
+          <p class="text-gray-400 mt-4">Loading team details...</p>
+        </div>
 
-                <!-- Error State -->
-                <div v-else-if="error" class="text-center py-12">
-                    <font-awesome-icon
-                        :icon="['fas', 'exclamation-circle']"
-                        class="text-error text-5xl mb-4"
-                    />
-                    <p class="text-error text-lg">{{ error }}</p>
-                </div>
+        <!-- Error State -->
+        <div v-else-if="error" class="text-center py-12">
+          <font-awesome-icon :icon="['fas', 'exclamation-circle']" class="text-error text-5xl mb-4" />
+          <p class="text-error text-lg">{{ error }}</p>
+        </div>
 
-                <!-- Team Details -->
-                <div v-else-if="selectedTeam" class="space-y-8">
-                    <!-- Team Header -->
-                    <div class="text-center mb-8">
-                        <h2
-                            class="text-4xl md:text-5xl font-bold text-white mb-2"
-                        >
-                            {{ selectedTeam.name }}
-                        </h2>
-                        <p class="text-2xl text-gray-400">
-                            {{ formatRecord(selectedTeam) }}
-                            <span class="text-fcabl-accent ml-2"
-                                >({{
-                                    formatWinPercentage(
-                                        calculateWinPercentage(selectedTeam),
-                                    )
-                                }})</span
-                            >
-                        </p>
-                    </div>
+        <!-- Team Details -->
+        <div v-else-if="selectedTeam" class="space-y-8">
+          <!-- Team Header -->
+          <div class="text-center mb-8">
+            <h2 class="text-4xl md:text-5xl font-bold text-white mb-2">
+              {{ selectedTeam.name }}
+            </h2>
+            <p class="text-2xl text-gray-400">
+              {{ formatRecord(selectedTeam) }}
+              <span class="text-fcabl-accent ml-2">({{
+                formatWinPercentage(
+                  calculateWinPercentage(selectedTeam),
+                )
+              }})</span>
+            </p>
+          </div>
 
-                    <!-- Team Statistics -->
-                    <TeamStats :team="selectedTeam" />
+          <!-- Team Statistics -->
+          <TeamStats :team="selectedTeam" />
 
-                    <!-- Team Roster -->
-                    <TeamRoster :roster="selectedTeam.players" />
+          <!-- Team Roster -->
+          <TeamRoster :roster="selectedTeam.players" />
 
-                    <!-- Team Schedule -->
-                    <!-- <TeamSchedule :games="selectedTeam.games" :team-id="selectedTeam.id" /> -->
-                </div>
+          <!-- Team Schedule -->
+          <!-- <TeamSchedule :games="selectedTeam.games" :team-id="selectedTeam.id" /> -->
+        </div>
 
-                <!-- No Team Selected -->
-                <div v-else class="text-center py-12">
-                    <font-awesome-icon
-                        :icon="['fas', 'basketball']"
-                        class="text-gray-600 text-5xl mb-4"
-                    />
-                    <p class="text-gray-400 text-lg">
-                        Select a team from the dropdown above to view details
-                    </p>
-                </div>
-            </div>
-        </section>
-    </div>
+        <!-- No Team Selected -->
+        <div v-else class="text-center py-12">
+          <font-awesome-icon :icon="['fas', 'basketball']" class="text-gray-600 text-5xl mb-4" />
+          <p class="text-gray-400 text-lg">
+            Select a team from the dropdown above to view details
+          </p>
+        </div>
+      </div>
+    </section>
+  </div>
 </template>

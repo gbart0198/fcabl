@@ -264,9 +264,7 @@ export interface Standing {
   /** Current rank position */
   rank: number;
   /** Team information with statistics */
-  team: TeamWithStats;
-  /** Current win/loss streak (e.g., "W3" or "L2") */
-  streak?: string;
+  team: Team;
 }
 
 /**
