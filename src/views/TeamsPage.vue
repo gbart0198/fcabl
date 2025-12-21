@@ -165,7 +165,7 @@ onMounted(async () => {
           <TeamRoster :roster="selectedTeam.players" />
 
           <!-- Team Schedule -->
-          <!-- <TeamSchedule :games="selectedTeam.games" :team-id="selectedTeam.id" /> -->
+          <TeamSchedule :games="selectedTeam.games" :team-id="selectedTeam.id" />
         </div>
 
         <!-- No Team Selected -->

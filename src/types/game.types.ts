@@ -139,12 +139,33 @@ export interface Game {
   /** Scheduled game time (ISO 8601 format: "2024-02-10T16:00:00") */
   gameTime: string; // json:"gameTime"
 
+  /** The home team's score if the game has completed */
+  homeScore: number // json:"homeScore"
+
+  /** The away team's score if the game has completed */
+  awayScore: number // json:"awayScore"
+
   /** Timestamp when game was created (ISO 8601 format: "2024-02-10T16:00:00") */
   createdAt: string; // json:"createdAt"
 
   /** Timestamp when game was last updated (ISO 8601 format: "2024-02-10T16:00:00") */
   updatedAt: string; // json:"updatedAt"
+
+  status: string; // json:"status"
 }
+
+/**
+ * 
+ *
+ */
+export interface GameWithDetails extends Game {
+  /** The home team's name */
+  homeName: string;
+
+  /** The away team's name */
+  awayName: string;
+}
+
 
 // ==================
 // COMPOSITE TYPES (Frontend Convenience Types)
@@ -194,30 +215,6 @@ export interface TeamWithStats extends Team {
 
   /** Average points allowed per game, computed: pointsAgainst / gamesPlayed */
   avgPointsAgainst: number;
-}
-
-/**
- * Game with full details including team names, scores, and status
- * Used for displaying game information in UI
- */
-export interface GameWithDetails extends Game {
-  /** Home team name (from Team.name) */
-  homeTeamName: string;
-
-  /** Away team name (from Team.name) */
-  awayTeamName: string;
-
-  /** Home team final score (from GameResult.homeScore if exists) */
-  homeScore?: number;
-
-  /** Away team final score (from GameResult.awayScore if exists) */
-  awayScore?: number;
-
-  /** Game status: scheduled, live, or completed (computed) */
-  status: "scheduled" | "live" | "completed";
-
-  /** Detailed game statistics (only for completed games) */
-  details?: GameDetails;
 }
 
 /**
