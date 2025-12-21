@@ -68,6 +68,8 @@ const isFormValid = computed(() => {
 
 // Handle form submission
 const handleSubmit = async () => {
+  console.log('Login form submitted');
+  
   // Mark all fields as touched
   touched.value.email = true;
   touched.value.password = true;
@@ -76,11 +78,18 @@ const handleSubmit = async () => {
   validateEmail();
   validatePassword();
 
+  console.log('Form data:', formData.value);
+  console.log('Form errors:', errors.value);
+  console.log('Form valid:', isFormValid.value);
+
   if (!isFormValid.value) {
+    console.log('Form validation failed');
     return;
   }
 
+  console.log('Calling authStore.login...');
   const success = await authStore.login(formData.value);
+  console.log('Login success:', success);
   
   if (success) {
     // Reset form

@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import router from './router'
+import { useAuthStore } from './stores/auth'
 import App from './App.vue'
 
 // Font Awesome
@@ -33,6 +34,11 @@ import {
   faSave,
   faListAlt,
   faExclamationTriangle,
+  faSignOutAlt,
+  faKey,
+  faEnvelope,
+  faCheckCircle,
+  faSpinner,
 } from '@fortawesome/free-solid-svg-icons'
 import {
   faFacebook,
@@ -68,6 +74,11 @@ library.add(
   faSave,
   faListAlt,
   faExclamationTriangle,
+  faSignOutAlt,
+  faKey,
+  faEnvelope,
+  faCheckCircle,
+  faSpinner,
   faFacebook,
   faTwitter,
   faInstagram,
@@ -82,7 +93,12 @@ const app = createApp(App)
 app.component('FontAwesomeIcon', FontAwesomeIcon)
 
 // Use plugins
-app.use(createPinia())
+const pinia = createPinia()
+app.use(pinia)
 app.use(router)
 
-app.mount('#app')
+// Initialize authentication on app load
+const authStore = useAuthStore()
+authStore.checkAuth().then(() => {
+  app.mount('#app')
+})

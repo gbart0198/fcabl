@@ -17,9 +17,6 @@ export const useAuthStore = defineStore('auth', () => {
   /** Currently authenticated user */
   const user = ref<User | null>(null);
   
-  /** JWT authentication token */
-  const token = ref<string | null>(null);
-  
   /** Loading state for async operations */
   const loading = ref(false);
   
@@ -28,10 +25,13 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Computed
   /** Whether a user is currently authenticated */
-  const isAuthenticated = computed(() => !!token.value && !!user.value);
+  const isAuthenticated = computed(() => !!user.value);
   
   /** Current user's full name (computed from firstName + lastName) */
   const userFullName = computed(() => user.value ? getUserFullName(user.value) : '');
+  
+  /** Whether current user is an admin */
+  const isAdmin = computed(() => user.value?.role === 'admin');
 
   // Actions
   /**
@@ -46,14 +46,8 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await authService.login(credentials);
       
-      if (response.success && response.token && response.user) {
-        token.value = response.token;
+      if (response.success && response.user) {
         user.value = response.user;
-        
-        // Persist to localStorage
-        localStorage.setItem('fcabl_token', response.token);
-        localStorage.setItem('fcabl_user', JSON.stringify(response.user));
-        
         return true;
       } else {
         error.value = response.error || 'Login failed';
@@ -80,14 +74,8 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await authService.register(data);
       
-      if (response.success && response.token && response.user) {
-        token.value = response.token;
+      if (response.success && response.user) {
         user.value = response.user;
-        
-        // Persist to localStorage
-        localStorage.setItem('fcabl_token', response.token);
-        localStorage.setItem('fcabl_user', JSON.stringify(response.user));
-        
         return true;
       } else {
         error.value = response.error || 'Registration failed';
@@ -104,45 +92,39 @@ export const useAuthStore = defineStore('auth', () => {
 
   /**
    * Logout current user
-   * Clears all authentication state and localStorage
+   * Clears HTTP-only cookie via backend
    */
   async function logout(): Promise<void> {
     await authService.logout();
-    token.value = null;
     user.value = null;
     error.value = null;
   }
 
   /**
    * Check if user is authenticated on app load
-   * Verifies stored token and restores user session
+   * Verifies JWT cookie and restores user session
    */
   async function checkAuth(): Promise<void> {
-    const storedToken = localStorage.getItem('fcabl_token');
-    const storedUser = localStorage.getItem('fcabl_user');
-    
-    if (storedToken && storedUser) {
-      const verifiedUser = await authService.verifyToken(storedToken);
+    try {
+      const verifiedUser = await authService.verifyToken();
       if (verifiedUser) {
-        token.value = storedToken;
         user.value = verifiedUser;
-      } else {
-        // Invalid token, clear storage
-        localStorage.removeItem('fcabl_token');
-        localStorage.removeItem('fcabl_user');
       }
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      user.value = null;
     }
   }
 
   return {
     // State
     user,
-    token,
     loading,
     error,
     // Computed
     isAuthenticated,
     userFullName,
+    isAdmin,
     // Actions
     login,
     register,

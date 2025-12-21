@@ -42,20 +42,39 @@ const router = createRouter({
       },
     },
     {
+      path: '/profile',
+      name: 'profile',
+      component: () => import('@/views/ProfilePage.vue'),
+      meta: {
+        title: 'My Profile - FCABL',
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/password-reset',
+      name: 'password-reset-request',
+      component: () => import('@/views/PasswordResetRequestPage.vue'),
+      meta: {
+        title: 'Reset Password - FCABL',
+      },
+    },
+    {
+      path: '/password-reset/confirm/:token',
+      name: 'password-reset-confirm',
+      component: () => import('@/views/PasswordResetConfirmPage.vue'),
+      props: true,
+      meta: {
+        title: 'Set New Password - FCABL',
+      },
+    },
+    {
       path: '/admin',
       name: 'admin',
       component: () => import('@/views/AdminPage.vue'),
       meta: {
         title: 'Admin Dashboard - FCABL',
         requiresAuth: true,
-      },
-      beforeEnter: (_to, _from, next) => {
-        const authStore = useAuthStore();
-        if (!authStore.isAuthenticated) {
-          next('/');
-        } else {
-          next();
-        }
+        requiresAdmin: true,
       },
     },
   ],
@@ -68,13 +87,39 @@ const router = createRouter({
   },
 });
 
+// Global navigation guard for authentication and authorization
+router.beforeEach(async (to, _from, next) => {
+  const authStore = useAuthStore();
+  
+  // Check if route requires authentication
+  if (to.meta.requiresAuth) {
+    // Ensure we have checked authentication status
+    if (!authStore.user) {
+      await authStore.checkAuth();
+    }
+    
+    // Redirect to home if not authenticated
+    if (!authStore.isAuthenticated) {
+      next({ name: 'home' });
+      return;
+    }
+    
+    // Check if route requires admin role
+    if (to.meta.requiresAdmin && !authStore.isAdmin) {
+      next({ name: 'home' });
+      return;
+    }
+  }
+  
+  next();
+});
+
 // Navigation guard for setting page titles
-router.beforeEach((to, _from, next) => {
+router.afterEach((to) => {
   const title = to.meta.title as string;
   if (title) {
     document.title = title;
   }
-  next();
 });
 
 export default router;

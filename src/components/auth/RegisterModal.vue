@@ -115,11 +115,15 @@ const markTouched = (field: keyof typeof touched.value) => {
 const isFormValid = computed(() => {
   return (
     formData.value.firstName &&
+    formData.value.lastName &&
     formData.value.email &&
+    formData.value.phoneNumber &&
     formData.value.password &&
     formData.value.confirmPassword &&
     formData.value.agreeToTerms &&
-    !errors.value.firstName && !errors.value.lastName && !errors.value.phoneNumber &&
+    !errors.value.firstName &&
+    !errors.value.lastName &&
+    !errors.value.phoneNumber &&
     !errors.value.email &&
     !errors.value.password &&
     !errors.value.confirmPassword
@@ -128,25 +132,38 @@ const isFormValid = computed(() => {
 
 // Handle form submission
 const handleSubmit = async () => {
+  console.log('Register form submitted');
+  
   // Mark all fields as touched
   touched.value.firstName = true;
+  touched.value.lastName = true;
   touched.value.email = true;
+  touched.value.phoneNumber = true;
   touched.value.password = true;
   touched.value.confirmPassword = true;
   touched.value.agreeToTerms = true;
 
   // Validate all fields
-  validateFirstName(); validateLastName(); validatePhoneNumber();
+  validateFirstName();
+  validateLastName();
+  validatePhoneNumber();
   validateEmail();
   validatePassword();
   validateConfirmPassword();
   validateTerms();
 
+  console.log('Form data:', formData.value);
+  console.log('Form errors:', errors.value);
+  console.log('Form valid:', isFormValid.value);
+
   if (!isFormValid.value) {
+    console.log('Form validation failed');
     return;
   }
 
+  console.log('Calling authStore.register...');
   const success = await authStore.register(formData.value);
+  console.log('Register success:', success);
   
   if (success) {
     // Reset form

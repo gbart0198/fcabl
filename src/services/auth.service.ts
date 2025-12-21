@@ -17,20 +17,14 @@ export const authService = {
    */
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      const response = await apiClient.post<{ token: string; user: User }>('/api/auth/login', {
+      const response = await apiClient.post<{ user: User }>('/api/auth/login', {
         email: credentials.email,
         password: credentials.password,
       });
 
-      // Store token and user in localStorage if rememberMe is true
-      if (credentials.rememberMe) {
-        localStorage.setItem('fcabl_token', response.token);
-        localStorage.setItem('fcabl_user', JSON.stringify(response.user));
-      }
-
+      // Cookie is set automatically by backend (HTTP-only)
       return {
         success: true,
-        token: response.token,
         user: response.user,
       };
     } catch (error) {
@@ -48,7 +42,7 @@ export const authService = {
    */
   async register(data: RegisterData): Promise<AuthResponse> {
     try {
-      const response = await apiClient.post<{ token: string; user: User }>('/api/auth/register', {
+      const response = await apiClient.post<{ user: User }>('/api/auth/register', {
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
@@ -56,13 +50,9 @@ export const authService = {
         password: data.password,
       });
 
-      // Store token and user in localStorage
-      localStorage.setItem('fcabl_token', response.token);
-      localStorage.setItem('fcabl_user', JSON.stringify(response.user));
-
+      // Cookie is set automatically by backend (HTTP-only)
       return {
         success: true,
-        token: response.token,
         user: response.user,
       };
     } catch (error) {
@@ -75,31 +65,64 @@ export const authService = {
 
   /**
    * Logout the current user
-   * Clears stored authentication data
+   * Clears HTTP-only cookie via backend
    */
   async logout(): Promise<void> {
-    // Could call backend logout endpoint if needed
-    // await apiClient.post('/api/auth/logout');
-    
-    // Clear local storage
-    localStorage.removeItem('fcabl_token');
-    localStorage.removeItem('fcabl_user');
+    try {
+      await apiClient.post('/api/auth/logout');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Continue anyway to clear local state
+    }
   },
 
   /**
-   * Verify a JWT token
-   * @param token - JWT token to verify
+   * Verify the JWT token stored in HTTP-only cookie
    * @returns Promise resolving to user data if token is valid, null otherwise
    */
-  async verifyToken(token: string): Promise<User | null> {
+  async verifyToken(): Promise<User | null> {
     try {
-      const user = await apiClient.post<User>('/api/auth/verify', { token });
+      // Token is sent automatically via HTTP-only cookie
+      const user = await apiClient.post<User>('/api/auth/verify');
       return user;
     } catch {
-      // Token verification failed, clear local storage
-      localStorage.removeItem('fcabl_token');
-      localStorage.removeItem('fcabl_user');
+      // Token verification failed
       return null;
+    }
+  },
+
+  /**
+   * Request a password reset email
+   * @param email - User's email address
+   * @returns Promise resolving to success status
+   */
+  async requestPasswordReset(email: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      await apiClient.post('/api/auth/password-reset/request', { email });
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Password reset request failed',
+      };
+    }
+  },
+
+  /**
+   * Reset password using token from email
+   * @param token - Reset token from email
+   * @param newPassword - New password
+   * @returns Promise resolving to success status
+   */
+  async resetPassword(token: string, newPassword: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      await apiClient.post('/api/auth/password-reset/confirm', { token, newPassword });
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Password reset failed',
+      };
     }
   },
 };

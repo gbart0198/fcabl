@@ -38,7 +38,7 @@ const handleLogout = async () => {
           <li><router-link to="/schedule" active-class="text-fcabl-accent bg-fcabl-dark/50 shadow-md ring-1 ring-fcabl-accent/30" class="text-gray-200 hover:text-white hover:bg-fcabl-dark/50">Schedule</router-link></li>
           <li><router-link to="/standings" active-class="text-fcabl-accent bg-fcabl-dark/50 shadow-md ring-1 ring-fcabl-accent/30" class="text-gray-200 hover:text-white hover:bg-fcabl-dark/50">Standings</router-link></li>
           <li><router-link to="/teams" active-class="text-fcabl-accent bg-fcabl-dark/50 shadow-md ring-1 ring-fcabl-accent/30" class="text-gray-200 hover:text-white hover:bg-fcabl-dark/50">Teams</router-link></li>
-          <li v-if="authStore.isAuthenticated"><router-link to="/admin" active-class="text-fcabl-accent bg-fcabl-dark/50 shadow-md ring-1 ring-fcabl-accent/30" class="text-gray-200 hover:text-white hover:bg-fcabl-dark/50">Admin</router-link></li>
+          <li v-if="authStore.isAdmin"><router-link to="/admin" active-class="text-fcabl-accent bg-fcabl-dark/50 shadow-md ring-1 ring-fcabl-accent/30" class="text-gray-200 hover:text-white hover:bg-fcabl-dark/50">Admin</router-link></li>
         </ul>
       </div>
 
@@ -61,8 +61,8 @@ const handleLogout = async () => {
               {{ authStore.userFullName }}
             </label>
             <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-fcabl-dark-light rounded-box w-52 mt-2">
-              <li><a href="#" class="text-gray-300">Profile</a></li>
-              <li><a href="#" class="text-gray-300">Settings</a></li>
+              <li><router-link to="/profile" class="text-gray-300">Profile</router-link></li>
+              <li><router-link to="/password-reset" class="text-gray-300">Change Password</router-link></li>
               <li><a @click="handleLogout" class="text-error">Logout</a></li>
             </ul>
           </div>
@@ -89,8 +89,8 @@ const handleLogout = async () => {
             </label>
             <ul tabindex="0" class="dropdown-content z-[60] menu p-2 shadow-xl bg-fcabl-dark-light rounded-box w-52 mt-2 right-0">
               <li class="menu-title text-gray-400">{{ authStore.userFullName }}</li>
-              <li><a href="#" class="text-gray-300">Profile</a></li>
-              <li><a href="#" class="text-gray-300">Settings</a></li>
+              <li><router-link to="/profile" @click="mobileMenuOpen = false" class="text-gray-300">Profile</router-link></li>
+              <li><router-link to="/password-reset" @click="mobileMenuOpen = false" class="text-gray-300">Change Password</router-link></li>
               <li><a @click="handleLogout" class="text-error">Logout</a></li>
             </ul>
           </div>
@@ -110,7 +110,7 @@ const handleLogout = async () => {
         <li><router-link to="/schedule" @click="toggleMobileMenu" active-class="text-fcabl-accent bg-fcabl-dark/50 font-semibold shadow-md ring-1 ring-fcabl-accent/30" class="text-gray-300">Schedule</router-link></li>
         <li><router-link to="/standings" @click="toggleMobileMenu" active-class="text-fcabl-accent bg-fcabl-dark/50 font-semibold shadow-md ring-1 ring-fcabl-accent/30" class="text-gray-300">Standings</router-link></li>
         <li><router-link to="/teams" @click="toggleMobileMenu" active-class="text-fcabl-accent bg-fcabl-dark/50 font-semibold shadow-md ring-1 ring-fcabl-accent/30" class="text-gray-300">Teams</router-link></li>
-        <li v-if="authStore.isAuthenticated"><router-link to="/admin" @click="toggleMobileMenu" active-class="text-fcabl-accent bg-fcabl-dark/50 font-semibold shadow-md ring-1 ring-fcabl-accent/30" class="text-gray-300">Admin</router-link></li>
+        <li v-if="authStore.isAdmin"><router-link to="/admin" @click="toggleMobileMenu" active-class="text-fcabl-accent bg-fcabl-dark/50 font-semibold shadow-md ring-1 ring-fcabl-accent/30" class="text-gray-300">Admin</router-link></li>
       </ul>
     </div>
   </nav>

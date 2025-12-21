@@ -67,9 +67,7 @@ export interface RegisterData {
 export interface AuthResponse {
   /** Whether the operation was successful */
   success: boolean;
-  /** JWT token if authentication succeeded */
-  token?: string;
-  /** User data if authentication succeeded */
+  /** User data if authentication succeeded (token stored in HTTP-only cookie) */
   user?: User;
   /** Error message if authentication failed */
   error?: string;
@@ -79,8 +77,6 @@ export interface AuthResponse {
 export interface AuthState {
   /** Currently authenticated user */
   user: User | null;
-  /** JWT authentication token */
-  token: string | null;
-  /** Whether a user is currently authenticated */
+  /** Whether a user is currently authenticated (JWT stored in HTTP-only cookie) */
   isAuthenticated: boolean;
 }

@@ -65,6 +65,7 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
   try {
     const response = await fetch(fullUrl, {
       ...options,
+      credentials: 'include', // Send cookies with requests for HTTP-only cookies
       headers: {
         'Content-Type': 'application/json',
         ...options.headers,
