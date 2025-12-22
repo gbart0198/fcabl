@@ -20,7 +20,7 @@ export { config } from './config';
 // Backward compatibility aliases for old service names
 // These map to the new service implementations
 import { teamService } from './team.service';
-import { gameService } from './game.service';
+import { gameService, type ListGamesByTeamParams } from './game.service';
 import { playerService } from './player.service';
 import type { Standing, GameWithDetails } from '@/types/game.types';
 
@@ -42,6 +42,12 @@ export const scheduleService = {
   async getAllGames(): Promise<GameWithDetails[]> {
     return gameService.listSchedule();
   },
+  async getGamesForTeam(teamId: number): Promise<GameWithDetails[]> {
+    const params: ListGamesByTeamParams = {
+      teamId: teamId.toString()
+    }
+    return gameService.listGamesByTeam(params);
+  }
 };
 
 /**

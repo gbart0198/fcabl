@@ -98,8 +98,8 @@ export const gameService = {
    * @param params - Query parameters (teamId)
    * @returns Promise resolving to array of games
    */
-  async listGamesByTeam(params: ListGamesByTeamParams): Promise<Game[]> {
-    return apiClient.get<Game[]>('/api/game/team', params);
+  async listGamesByTeam(params: ListGamesByTeamParams): Promise<GameWithDetails[]> {
+    return apiClient.get<GameWithDetails[]>('/api/game/schedule', params);
   },
 
   /**

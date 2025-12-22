@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { teamService } from "@/services/api";
-import type { Team, TeamWithPlayers } from "@/types/game.types";
+import { scheduleService, teamService } from "@/services/api";
+import type { GameWithDetails, Team, TeamWithPlayers } from "@/types/game.types";
 import TeamStats from "@/components/teams/TeamStats.vue";
 import TeamRoster from "@/components/teams/TeamRoster.vue";
 import TeamSchedule from "@/components/teams/TeamSchedule.vue";
@@ -11,11 +11,12 @@ import TeamSchedule from "@/components/teams/TeamSchedule.vue";
 const route = useRoute();
 
 const allTeams = ref<TeamWithPlayers[]>([]);
+const schedules = ref<Map<number, GameWithDetails[]>>(new Map<number, GameWithDetails[]>());
 const selectedTeam = ref<TeamWithPlayers | null>(null);
 const selectedTeamId = ref<number>(0);
 const loading = ref(false);
-const error = ref<string | null>(null);
 
+const error = ref<string | null>(null);
 // Sort teams alphabetically by name
 const sortedTeams = computed(() => {
   return [...allTeams.value].sort((a, b) => a.name.localeCompare(b.name));
@@ -54,8 +55,19 @@ const loadTeamDetails = async (teamId: number | string | undefined) => {
       selectedTeam.value = null;
       selectedTeamId.value = 0;
     }
+
+    if (!schedules.value.has(teamId) && typeof teamId === "number") {
+      const games = await scheduleService.getGamesForTeam(teamId);
+      schedules.value.set(teamId, games);
+    }
   }
 };
+
+const getTeamSchedule = (teamId: number): GameWithDetails[] => {
+  const games = schedules.value.get(teamId);
+  if (!games) return [];
+  return games;
+}
 
 // Watch query parameter changes
 watch(
@@ -165,7 +177,7 @@ onMounted(async () => {
           <TeamRoster :roster="selectedTeam.players" />
 
           <!-- Team Schedule -->
-          <TeamSchedule :games="selectedTeam.games" :team-id="selectedTeam.id" />
+          <TeamSchedule :games="getTeamSchedule(selectedTeamId)" :team-id="selectedTeamId" />
         </div>
 
         <!-- No Team Selected -->

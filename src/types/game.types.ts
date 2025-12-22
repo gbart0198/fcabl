@@ -131,7 +131,7 @@ export interface Game {
   id: string; // json:"id"
 
   /** Home team ID */
-  homeTeamId: string; // json:"homeTeamId"
+  homeTeamId: number; // json:"homeTeamId"
 
   /** Away team ID */
   awayTeamId: string; // json:"awayTeamId"
