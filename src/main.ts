@@ -39,6 +39,9 @@ import {
   faEnvelope,
   faCheckCircle,
   faSpinner,
+  faHome,
+  faMedal,
+  faCog,
 } from '@fortawesome/free-solid-svg-icons'
 import {
   faFacebook,
@@ -79,6 +82,9 @@ library.add(
   faEnvelope,
   faCheckCircle,
   faSpinner,
+  faHome,
+  faMedal,
+  faCog,
   faFacebook,
   faTwitter,
   faInstagram,

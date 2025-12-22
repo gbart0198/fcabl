@@ -234,10 +234,10 @@ const handleClose = () => {
 
 <template>
   <dialog :class="['modal', { 'modal-open': show }]">
-    <div class="modal-box bg-fcabl-dark-light max-w-lg">
+    <div class="modal-box bg-fcabl-dark-light max-w-[95vw] sm:max-w-lg p-4 sm:p-6 mx-2">
       <!-- Header -->
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="font-bold text-2xl text-white">Join FCABL</h3>
+      <div class="flex justify-between items-center mb-4 sm:mb-6">
+        <h3 class="font-bold text-xl sm:text-2xl text-white">Join FCABL</h3>
         <button @click="handleClose" class="btn btn-sm btn-circle btn-ghost">
           <font-awesome-icon :icon="['fas', 'times']" />
         </button>
@@ -250,7 +250,7 @@ const handleClose = () => {
       </div>
 
       <!-- Register Form -->
-      <form @submit.prevent="handleSubmit" class="space-y-4">
+      <form @submit.prevent="handleSubmit" class="space-y-3 sm:space-y-4">
         <!-- First Name Field -->
         <div class="form-control">
           <label class="label">

@@ -34,4 +34,9 @@
   a.btn-lg {
     @apply px-8;
   }
+  
+  /* Add horizontal padding to input fields */
+  .input {
+    @apply px-4;
+  }
 }
