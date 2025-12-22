@@ -42,6 +42,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/playoffs',
+      name: 'playoffs',
+      component: () => import('@/views/SchedulePage.vue'),
+      meta: {
+        title: 'Playoffs - FCABL',
+      },
+    },
+    {
       path: '/profile',
       name: 'profile',
       component: () => import('@/views/ProfilePage.vue'),
@@ -90,27 +98,27 @@ const router = createRouter({
 // Global navigation guard for authentication and authorization
 router.beforeEach(async (to, _from, next) => {
   const authStore = useAuthStore();
-  
+
   // Check if route requires authentication
   if (to.meta.requiresAuth) {
     // Ensure we have checked authentication status
     if (!authStore.user) {
       await authStore.checkAuth();
     }
-    
+
     // Redirect to home if not authenticated
     if (!authStore.isAuthenticated) {
       next({ name: 'home' });
       return;
     }
-    
+
     // Check if route requires admin role
     if (to.meta.requiresAdmin && !authStore.isAdmin) {
       next({ name: 'home' });
       return;
     }
   }
-  
+
   next();
 });
 

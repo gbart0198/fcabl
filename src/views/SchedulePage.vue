@@ -13,7 +13,7 @@ const expandedGameIds = ref<Set<string>>(new Set());
 // Group games by date
 const gamesByDate = computed(() => {
   const grouped = new Map<string, GameWithDetails[]>();
-  
+
   allGames.value.forEach(game => {
     const dateKey = formatGameDate(game.gameTime);
     if (!grouped.has(dateKey)) {
@@ -21,14 +21,14 @@ const gamesByDate = computed(() => {
     }
     grouped.get(dateKey)!.push(game);
   });
-  
+
   // Sort games within each date by time
   grouped.forEach((games) => {
     games.sort((a, b) => {
       return new Date(a.gameTime).getTime() - new Date(b.gameTime).getTime();
     });
   });
-  
+
   // Convert to array and sort by date (oldest first)
   return Array.from(grouped.entries())
     .sort(([, gamesA], [, gamesB]) => {
@@ -42,11 +42,11 @@ const formatDateHeader = (dateString: string): string => {
   // dateString is already formatted like "Feb 10, 2024"
   // Parse it and reformat
   const date = new Date(dateString);
-  const options: Intl.DateTimeFormatOptions = { 
-    weekday: 'long', 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
   };
   return date.toLocaleDateString('en-US', options);
 };
@@ -113,11 +113,7 @@ onMounted(async () => {
 
         <!-- Schedule by Date -->
         <div v-else-if="gamesByDate.length > 0" class="space-y-8">
-          <div
-            v-for="[date, games] in gamesByDate"
-            :key="date"
-            class="bg-fcabl-dark-light rounded-lg shadow-xl p-6"
-          >
+          <div v-for="[date, games] in gamesByDate" :key="date" class="bg-fcabl-dark-light rounded-lg shadow-xl p-6">
             <!-- Date Header -->
             <h2 class="text-2xl font-bold text-white mb-4 pb-3 border-b border-gray-700">
               {{ formatDateHeader(date) }}
@@ -125,17 +121,10 @@ onMounted(async () => {
 
             <!-- Games for this date -->
             <div class="space-y-3">
-              <div
-                v-for="game in games"
-                :key="game.id"
-                class="card bg-fcabl-dark shadow-md transition-shadow"
-                :class="{ 'hover:shadow-lg cursor-pointer': isCompleted(game) }"
-              >
+              <div v-for="game in games" :key="game.id" class="card bg-fcabl-dark shadow-md transition-shadow"
+                :class="{ 'hover:shadow-lg cursor-pointer': isCompleted(game) }">
                 <!-- Main Game Card -->
-                <div 
-                  class="card-body p-4"
-                  @click="isCompleted(game) ? toggleGameDetails(game.id) : null"
-                >
+                <div class="card-body p-4" @click="isCompleted(game) ? toggleGameDetails(game.id) : null">
                   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <!-- Time -->
                     <div class="text-sm font-semibold text-gray-400 sm:w-24">
@@ -175,97 +164,52 @@ onMounted(async () => {
 
                     <!-- Status Badge & Expand Icon -->
                     <div class="flex items-center gap-2 justify-center sm:justify-end sm:w-24">
-                      <span
-                        v-if="isCompleted(game)"
-                        class="badge badge-success badge-sm"
-                      >
+                      <span v-if="isCompleted(game)" class="badge badge-success badge-sm">
                         Final
                       </span>
-                      <span
-                        v-else
-                        class="badge badge-outline badge-sm text-gray-400 border-gray-600"
-                      >
+                      <span v-else class="badge badge-outline badge-sm text-gray-400 border-gray-600">
                         Scheduled
                       </span>
-                      <font-awesome-icon 
-                        v-if="isCompleted(game)"
-                        :icon="['fas', isExpanded(game.id) ? 'chevron-up' : 'chevron-down']" 
-                        class="text-gray-400 text-sm"
-                      />
+                      <font-awesome-icon v-if="isCompleted(game)"
+                        :icon="['fas', isExpanded(game.id) ? 'chevron-up' : 'chevron-down']"
+                        class="text-gray-400 text-sm" />
                     </div>
                   </div>
                 </div>
 
                 <!-- Expanded Game Details -->
-                <div 
-                  v-if="isCompleted(game) && isExpanded(game.id) && game.details"
-                  class="border-t border-gray-700 p-4 bg-fcabl-dark-light"
-                >
-                  <!-- Half-Time Scores -->
-                  <div class="mb-4">
-                    <h4 class="text-sm font-semibold text-gray-400 mb-2 uppercase">Score by Half</h4>
-                    <div class="grid grid-cols-2 gap-4">
-                      <!-- Away Team Halves -->
-                      <div class="text-center">
-                        <div class="text-xs text-gray-400 mb-1">{{ game.awayTeamName }}</div>
-                        <div class="flex justify-center gap-4 text-sm">
-                          <span class="text-white">
-                            <span class="text-gray-500">1st:</span> {{ game.details.awayFirstHalf }}
-                          </span>
-                          <span class="text-white">
-                            <span class="text-gray-500">2nd:</span> {{ game.details.awaySecondHalf }}
-                          </span>
-                        </div>
-                      </div>
-                      <!-- Home Team Halves -->
-                      <div class="text-center">
-                        <div class="text-xs text-gray-400 mb-1">{{ game.homeTeamName }}</div>
-                        <div class="flex justify-center gap-4 text-sm">
-                          <span class="text-white">
-                            <span class="text-gray-500">1st:</span> {{ game.details.homeFirstHalf }}
-                          </span>
-                          <span class="text-white">
-                            <span class="text-gray-500">2nd:</span> {{ game.details.homeSecondHalf }}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
+                <div v-if="isCompleted(game) && isExpanded(game.id)"
+                  class="border-t border-gray-700 p-4 bg-fcabl-dark-light">
                   <!-- Player Statistics -->
                   <div class="grid md:grid-cols-2 gap-4">
                     <!-- Away Team Players -->
                     <div>
-                      <h4 class="text-sm font-semibold text-gray-400 mb-2 uppercase">{{ game.awayTeamName }} - Players</h4>
+                      <h4 class="text-sm font-semibold text-gray-400 mb-2 uppercase">{{ game.awayTeamName }}
+                      </h4>
                       <div class="space-y-1">
-                        <div 
-                          v-for="player in game.details.awayPlayerStats"
-                          :key="player.playerId"
-                          class="flex items-center justify-between text-sm py-1 px-2 rounded bg-fcabl-dark/50"
-                        >
+                        <div v-for="player in game.awayPlayerStats" :key="player.playerId"
+                          class="flex items-center justify-between text-sm py-1 px-2 rounded bg-fcabl-dark/50">
                           <span class="text-gray-300">
                             <span class="text-gray-500 font-mono text-xs mr-2">#{{ player.number }}</span>
-                            {{ player.playerName }}
+                            {{ player.playerFirstName + " " + player.playerLastName }}
                           </span>
-                          <span class="text-white font-semibold">{{ player.points }} pts</span>
+                          <span class="text-white font-semibold">{{ player.score }} pts</span>
                         </div>
                       </div>
                     </div>
 
                     <!-- Home Team Players -->
                     <div>
-                      <h4 class="text-sm font-semibold text-gray-400 mb-2 uppercase">{{ game.homeTeamName }} - Players</h4>
+                      <h4 class="text-sm font-semibold text-gray-400 mb-2 uppercase">{{ game.homeTeamName }}
+                      </h4>
                       <div class="space-y-1">
-                        <div 
-                          v-for="player in game.details.homePlayerStats"
-                          :key="player.playerId"
-                          class="flex items-center justify-between text-sm py-1 px-2 rounded bg-fcabl-dark/50"
-                        >
+                        <div v-for="player in game.homePlayerStats" :key="player.playerId"
+                          class="flex items-center justify-between text-sm py-1 px-2 rounded bg-fcabl-dark/50">
                           <span class="text-gray-300">
                             <span class="text-gray-500 font-mono text-xs mr-2">#{{ player.number }}</span>
-                            {{ player.playerName }}
+                            {{ player.playerFirstName + " " + player.playerLastName }}
                           </span>
-                          <span class="text-white font-semibold">{{ player.points }} pts</span>
+                          <span class="text-white font-semibold">{{ player.score }} pts</span>
                         </div>
                       </div>
                     </div>

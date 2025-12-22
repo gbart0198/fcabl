@@ -128,6 +128,14 @@ export const gameService = {
     return apiClient.get<GameWithDetails[]>('/api/game/schedule', params);
   },
 
+  /** 
+   * List the schedule for all teams.
+   * @returns Promise resolving to array of scheduled games
+   */
+  async listSchedule(): Promise<GameWithDetails[]> {
+    return apiClient.get<GameWithDetails[]>('/api/game/schedule/list');
+  },
+
   /**
    * Get a single game by id
    * @param params - Query parameters (id)

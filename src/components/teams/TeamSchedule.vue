@@ -44,7 +44,7 @@ const getGameResult = (game: GameWithDetails): 'W' | 'L' | null => {
 };
 
 const getOpponent = (game: GameWithDetails): string => {
-  return isHomeGame(game) ? game.awayName : game.homeName;
+  return isHomeGame(game) ? game.awayTeamName : game.homeTeamName;
 };
 
 const getTeamScore = (game: GameWithDetails): number | undefined => {

@@ -40,7 +40,7 @@ export const standingsService = {
  */
 export const scheduleService = {
   async getAllGames(): Promise<GameWithDetails[]> {
-    return gameService.listGamesWithTeams();
+    return gameService.listSchedule();
   },
 };
 
@@ -58,11 +58,11 @@ export const adminService = {
   async createTeam(data: { name: string }) {
     return teamService.createTeam(data);
   },
-  
+
   async updateTeam(id: string, data: { name: string }) {
     return teamService.updateTeam({ id, ...data });
   },
-  
+
   async deleteTeam(id: string) {
     return teamService.deleteTeam(id);
   },
@@ -77,18 +77,18 @@ export const adminService = {
       gameTime,
     });
   },
-  
+
   async updateGame(id: string, data: { date?: string; time?: string; status?: 'scheduled' | 'completed'; homeScore?: number; awayScore?: number }) {
     const updateData: { id: string; gameTime?: string } = { id };
-    
+
     // Combine date and time if provided
     if (data.date && data.time) {
       updateData.gameTime = `${data.date}T${convertTimeTo24Hour(data.time)}:00`;
     }
-    
+
     return gameService.updateGame(updateData);
   },
-  
+
   async deleteGame(id: string) {
     return gameService.deleteGame(id);
   },
@@ -97,15 +97,15 @@ export const adminService = {
   async getAllPlayers() {
     return playerService.listPlayersWithUsers();
   },
-  
+
   async getUnassignedPlayers() {
     return playerService.listFreeAgents();
   },
-  
+
   async getTeamPlayers(teamId: string) {
     return playerService.listPlayersByTeam({ teamId });
   },
-  
+
   async assignPlayerToTeam(playerId: string, teamId: string, jerseyNumber?: number) {
     return playerService.updatePlayerTeam({
       playerId,
@@ -113,7 +113,7 @@ export const adminService = {
       jerseyNumber: jerseyNumber || null,
     });
   },
-  
+
   async removePlayerFromTeam(playerId: string, _teamId: string) {
     return playerService.updatePlayerTeam({
       playerId,
@@ -121,7 +121,7 @@ export const adminService = {
       jerseyNumber: null,
     });
   },
-  
+
   async updatePlayerNumber(playerId: string, teamId: string, jerseyNumber: number) {
     return playerService.updatePlayerTeam({
       playerId,
@@ -148,7 +148,7 @@ export const adminService = {
       awayScore: data.awayScore,
       status: 'completed',
     });
-    
+
     // TODO: Submit player stats when backend endpoint is ready
     // For now, just return success
     return { success: true };
@@ -165,29 +165,29 @@ function convertTimeTo24Hour(time: string): string {
   if (!time.includes('AM') && !time.includes('PM')) {
     return time;
   }
-  
+
   const parts = time.split(' ');
   if (parts.length !== 2) return time;
-  
+
   const timePart = parts[0];
   const period = parts[1];
-  
+
   if (!timePart || !period) return time;
-  
+
   const timeParts = timePart.split(':').map(Number);
   if (timeParts.length !== 2) return time;
-  
+
   const hours = timeParts[0];
   const minutes = timeParts[1];
-  
+
   if (hours === undefined || minutes === undefined) return time;
-  
+
   let hour24 = hours;
   if (period === 'PM' && hours !== 12) {
     hour24 = hours + 12;
   } else if (period === 'AM' && hours === 12) {
     hour24 = 0;
   }
-  
+
   return `${hour24.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 }

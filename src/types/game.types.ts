@@ -160,10 +160,16 @@ export interface Game {
  */
 export interface GameWithDetails extends Game {
   /** The home team's name */
-  homeName: string;
+  homeTeamName: string;
 
   /** The away team's name */
-  awayName: string;
+  awayTeamName: string;
+
+  /** The player stats for home team */
+  homePlayerStats: PlayerGameStats[];
+
+  /** The player stats for away team */
+  awayPlayerStats: PlayerGameStats[];
 }
 
 
@@ -224,12 +230,14 @@ export interface TeamWithStats extends Team {
 export interface PlayerGameStats {
   /** Player ID */
   playerId: string;
-  /** Player name */
-  playerName: string;
+  /** Player first name */
+  playerFirstName: string;
+  /** Player last name */
+  playerLastName: string;
   /** Jersey number */
   number: number;
   /** Total points scored in the game */
-  points: number;
+  score: number;
 }
 
 /**
