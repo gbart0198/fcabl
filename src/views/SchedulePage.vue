@@ -1,71 +1,13 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { scheduleService } from '@/services/api';
 import type { GameWithDetails } from '@/types/game.types';
-import { formatGameDate, formatGameTime } from '@/utils/game';
+import ScheduleList from '@/components/schedule/ScheduleList.vue';
 
 const allGames = ref<GameWithDetails[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
-const expandedGameIds = ref<Set<string>>(new Set());
-
-// Group games by date
-const gamesByDate = computed(() => {
-  const grouped = new Map<string, GameWithDetails[]>();
-
-  allGames.value.forEach(game => {
-    const dateKey = formatGameDate(game.gameTime);
-    if (!grouped.has(dateKey)) {
-      grouped.set(dateKey, []);
-    }
-    grouped.get(dateKey)!.push(game);
-  });
-
-  // Sort games within each date by time
-  grouped.forEach((games) => {
-    games.sort((a, b) => {
-      return new Date(a.gameTime).getTime() - new Date(b.gameTime).getTime();
-    });
-  });
-
-  // Convert to array and sort by date (oldest first)
-  return Array.from(grouped.entries())
-    .sort(([, gamesA], [, gamesB]) => {
-      const timeA = gamesA[0]?.gameTime ? new Date(gamesA[0].gameTime).getTime() : 0;
-      const timeB = gamesB[0]?.gameTime ? new Date(gamesB[0].gameTime).getTime() : 0;
-      return timeA - timeB;
-    });
-});
-
-const formatDateHeader = (dateString: string): string => {
-  // dateString is already formatted like "Feb 10, 2024"
-  // Parse it and reformat
-  const date = new Date(dateString);
-  const options: Intl.DateTimeFormatOptions = {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  };
-  return date.toLocaleDateString('en-US', options);
-};
-
-const isCompleted = (game: GameWithDetails): boolean => {
-  return game.status === 'completed';
-};
-
-const isExpanded = (gameId: string): boolean => {
-  return expandedGameIds.value.has(gameId);
-};
-
-const toggleGameDetails = (gameId: string) => {
-  if (expandedGameIds.value.has(gameId)) {
-    expandedGameIds.value.delete(gameId);
-  } else {
-    expandedGameIds.value.add(gameId);
-  }
-};
 
 onMounted(async () => {
   try {
@@ -111,120 +53,12 @@ onMounted(async () => {
           <p class="text-error text-lg">{{ error }}</p>
         </div>
 
-        <!-- Schedule by Date -->
-        <div v-else-if="gamesByDate.length > 0" class="space-y-8">
-          <div v-for="[date, games] in gamesByDate" :key="date" class="bg-fcabl-dark-light rounded-lg shadow-xl p-6">
-            <!-- Date Header -->
-            <h2 class="text-2xl font-bold text-white mb-4 pb-3 border-b border-gray-700">
-              {{ formatDateHeader(date) }}
-            </h2>
-
-            <!-- Games for this date -->
-            <div class="space-y-3">
-              <div v-for="game in games" :key="game.id" class="card bg-fcabl-dark shadow-md transition-shadow"
-                :class="{ 'hover:shadow-lg cursor-pointer': isCompleted(game) }">
-                <!-- Main Game Card -->
-                <div class="card-body p-4" @click="isCompleted(game) ? toggleGameDetails(game.id) : null">
-                  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <!-- Time -->
-                    <div class="text-sm font-semibold text-gray-400 sm:w-24">
-                      {{ formatGameTime(game.gameTime) }}
-                    </div>
-
-                    <!-- Teams & Score -->
-                    <div class="flex-1">
-                      <div class="flex items-center justify-center gap-3">
-                        <!-- Away Team -->
-                        <span class="text-white font-semibold text-right flex-1">
-                          {{ game.awayTeamName }}
-                        </span>
-
-                        <!-- Score or @ symbol -->
-                        <div class="text-center w-20">
-                          <template v-if="isCompleted(game)">
-                            <span class="text-lg font-bold">
-                              <span class="text-white">{{ game.awayScore }}</span>
-                              <span class="text-gray-500 mx-1">-</span>
-                              <span class="text-white">{{ game.homeScore }}</span>
-                            </span>
-                          </template>
-                          <template v-else>
-                            <span class="text-gray-400 font-semibold">@</span>
-                          </template>
-                        </div>
-
-                        <!-- Home Team -->
-                        <span class="text-white font-semibold text-left flex-1">
-                          {{ game.homeTeamName }}
-                        </span>
-                      </div>
-
-
-                    </div>
-
-                    <!-- Status Badge & Expand Icon -->
-                    <div class="flex items-center gap-2 justify-center sm:justify-end sm:w-24">
-                      <span v-if="isCompleted(game)" class="badge badge-success badge-sm">
-                        Final
-                      </span>
-                      <span v-else class="badge badge-outline badge-sm text-gray-400 border-gray-600">
-                        Scheduled
-                      </span>
-                      <font-awesome-icon v-if="isCompleted(game)"
-                        :icon="['fas', isExpanded(game.id) ? 'chevron-up' : 'chevron-down']"
-                        class="text-gray-400 text-sm" />
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Expanded Game Details -->
-                <div v-if="isCompleted(game) && isExpanded(game.id)"
-                  class="border-t border-gray-700 p-4 bg-fcabl-dark-light">
-                  <!-- Player Statistics -->
-                  <div class="grid md:grid-cols-2 gap-4">
-                    <!-- Away Team Players -->
-                    <div>
-                      <h4 class="text-sm font-semibold text-gray-400 mb-2 uppercase">{{ game.awayTeamName }}
-                      </h4>
-                      <div class="space-y-1">
-                        <div v-for="player in game.awayPlayerStats" :key="player.playerId"
-                          class="flex items-center justify-between text-sm py-1 px-2 rounded bg-fcabl-dark/50">
-                          <span class="text-gray-300">
-                            <span class="text-gray-500 font-mono text-xs mr-2">#{{ player.number }}</span>
-                            {{ player.playerFirstName + " " + player.playerLastName }}
-                          </span>
-                          <span class="text-white font-semibold">{{ player.score }} pts</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Home Team Players -->
-                    <div>
-                      <h4 class="text-sm font-semibold text-gray-400 mb-2 uppercase">{{ game.homeTeamName }}
-                      </h4>
-                      <div class="space-y-1">
-                        <div v-for="player in game.homePlayerStats" :key="player.playerId"
-                          class="flex items-center justify-between text-sm py-1 px-2 rounded bg-fcabl-dark/50">
-                          <span class="text-gray-300">
-                            <span class="text-gray-500 font-mono text-xs mr-2">#{{ player.number }}</span>
-                            {{ player.playerFirstName + " " + player.playerLastName }}
-                          </span>
-                          <span class="text-white font-semibold">{{ player.score }} pts</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- No Games -->
-        <div v-else class="text-center py-12">
-          <font-awesome-icon :icon="['fas', 'calendar']" class="text-gray-600 text-5xl mb-4" />
-          <p class="text-gray-400 text-lg">No games scheduled</p>
-        </div>
+        <!-- Schedule List -->
+        <ScheduleList 
+          v-else
+          :games="allGames"
+          :group-by-date="true"
+        />
       </div>
     </section>
   </div>
